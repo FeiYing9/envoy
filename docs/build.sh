@@ -6,6 +6,7 @@
 . tools/shell_utils.sh
 
 set -e
+set -x
 
 RELEASE_TAG_REGEX="^refs/tags/v.*"
 
