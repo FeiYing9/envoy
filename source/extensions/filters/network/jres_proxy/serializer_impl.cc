@@ -1,9 +1,9 @@
-#include "extensions/filters/network/dubbo_proxy/serializer_impl.h"
+#include "extensions/filters/network/jres_proxy/serializer_impl.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 void RpcInvocationImpl::addParameterValue(uint32_t index, const std::string& value) {
   assignParameterIfNeed();
@@ -42,7 +42,7 @@ void RpcInvocationImpl::addHeaderReference(const Http::LowerCaseString& key,
   headers_->addReference(key, value);
 }
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

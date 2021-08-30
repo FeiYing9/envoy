@@ -4,14 +4,14 @@
 #include "common/common/fmt.h"
 #include "common/singleton/const_singleton.h"
 
-#include "extensions/filters/network/dubbo_proxy/message.h"
+#include "extensions/filters/network/jres_proxy/message.h"
 
 #include "absl/container/node_hash_map.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 /**
  * Names of available Protocol implementations.
@@ -25,7 +25,7 @@ public:
   using ProtocolTypeNameMap = absl::node_hash_map<ProtocolType, std::string, ProtocolTypeHash>;
 
   const ProtocolTypeNameMap protocolTypeNameMap = {
-      {ProtocolType::Dubbo, "dubbo"},
+      {ProtocolType::Jres, "jres"},
   };
 
   const std::string& fromType(ProtocolType type) const {
@@ -80,7 +80,7 @@ public:
   using ProtocolSerializerTypeNameMap = absl::node_hash_map<uint8_t, std::string>;
 
   const ProtocolSerializerTypeNameMap protocolSerializerTypeNameMap = {
-      {GENERATE_PAIR(ProtocolType::Dubbo, SerializationType::Hessian2)},
+      {GENERATE_PAIR(ProtocolType::Jres, SerializationType::Hessian2)},
   };
 
   const std::string& fromType(ProtocolType protocol_type, SerializationType type) const {
@@ -92,7 +92,7 @@ public:
 
 using ProtocolSerializerNames = ConstSingleton<ProtocolSerializerNameValues>;
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

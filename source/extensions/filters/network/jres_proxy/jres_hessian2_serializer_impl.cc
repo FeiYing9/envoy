@@ -1,26 +1,26 @@
-#include "extensions/filters/network/dubbo_proxy/dubbo_hessian2_serializer_impl.h"
+#include "extensions/filters/network/jres_proxy/jres_hessian2_serializer_impl.h"
 
 #include "envoy/common/exception.h"
 
 #include "common/common/assert.h"
 #include "common/common/macros.h"
 
-#include "extensions/filters/network/dubbo_proxy/hessian_utils.h"
-#include "extensions/filters/network/dubbo_proxy/message_impl.h"
-#include "extensions/filters/network/dubbo_proxy/serializer.h"
-#include "extensions/filters/network/dubbo_proxy/serializer_impl.h"
+#include "extensions/filters/network/jres_proxy/hessian_utils.h"
+#include "extensions/filters/network/jres_proxy/message_impl.h"
+#include "extensions/filters/network/jres_proxy/serializer.h"
+#include "extensions/filters/network/jres_proxy/serializer_impl.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 std::pair<RpcInvocationSharedPtr, bool>
-DubboHessian2SerializerImpl::deserializeRpcInvocation(Buffer::Instance& buffer,
+JresHessian2SerializerImpl::deserializeRpcInvocation(Buffer::Instance& buffer,
                                                       ContextSharedPtr context) {
   size_t total_size = 0, size;
   // TODO(zyfjeff): Add format checker
-  std::string dubbo_version = HessianUtils::peekString(buffer, &size);
+  std::string jres_version = HessianUtils::peekString(buffer, &size);
   total_size += size;
   std::string service_name = HessianUtils::peekString(buffer, &size, total_size);
   total_size += size;
@@ -43,7 +43,7 @@ DubboHessian2SerializerImpl::deserializeRpcInvocation(Buffer::Instance& buffer,
 }
 
 std::pair<RpcResultSharedPtr, bool>
-DubboHessian2SerializerImpl::deserializeRpcResult(Buffer::Instance& buffer,
+JresHessian2SerializerImpl::deserializeRpcResult(Buffer::Instance& buffer,
                                                   ContextSharedPtr context) {
   ASSERT(buffer.length() >= context->bodySize());
   size_t total_size = 0;
@@ -83,7 +83,7 @@ DubboHessian2SerializerImpl::deserializeRpcResult(Buffer::Instance& buffer,
   return std::pair<RpcResultSharedPtr, bool>(result, true);
 }
 
-size_t DubboHessian2SerializerImpl::serializeRpcResult(Buffer::Instance& output_buffer,
+size_t JresHessian2SerializerImpl::serializeRpcResult(Buffer::Instance& output_buffer,
                                                        const std::string& content,
                                                        RpcResponseType type) {
   size_t origin_length = output_buffer.length();
@@ -100,19 +100,19 @@ size_t DubboHessian2SerializerImpl::serializeRpcResult(Buffer::Instance& output_
   return serialized_size;
 }
 
-class DubboHessian2SerializerConfigFactory
-    : public SerializerFactoryBase<DubboHessian2SerializerImpl> {
+class JresHessian2SerializerConfigFactory
+    : public SerializerFactoryBase<JresHessian2SerializerImpl> {
 public:
-  DubboHessian2SerializerConfigFactory()
-      : SerializerFactoryBase(ProtocolType::Dubbo, SerializationType::Hessian2) {}
+  JresHessian2SerializerConfigFactory()
+      : SerializerFactoryBase(ProtocolType::Jres, SerializationType::Hessian2) {}
 };
 
 /**
  * Static registration for the Hessian protocol. @see RegisterFactory.
  */
-REGISTER_FACTORY(DubboHessian2SerializerConfigFactory, NamedSerializerConfigFactory);
+REGISTER_FACTORY(JresHessian2SerializerConfigFactory, NamedSerializerConfigFactory);
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

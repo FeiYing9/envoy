@@ -1,9 +1,9 @@
-#include "extensions/filters/network/dubbo_proxy/buffer_helper.h"
+#include "extensions/filters/network/jres_proxy/buffer_helper.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 double BufferHelper::peekDouble(Buffer::Instance& buffer, uint64_t offset) {
   if (buffer.length() < offset + 8) {
@@ -24,7 +24,7 @@ float BufferHelper::peekFloat(Buffer::Instance& buffer, uint64_t offset) {
   std::memcpy(&i, &j, 4);
   return i;
 }
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

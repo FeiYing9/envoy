@@ -10,18 +10,15 @@
 #include "common/config/utility.h"
 #include "common/singleton/const_singleton.h"
 
-#include "extensions/filters/network/dubbo_proxy/message.h"
-#include "extensions/filters/network/dubbo_proxy/metadata.h"
-#include "extensions/filters/network/dubbo_proxy/serializer.h"
+#include "extensions/filters/network/jres_proxy/message.h"
+#include "extensions/filters/network/jres_proxy/metadata.h"
+#include "extensions/filters/network/jres_proxy/serializer.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
-/**
- * See https://dubbo.incubator.apache.org/en-us/docs/dev/implementation.html
- */
 class Protocol {
 public:
   virtual ~Protocol() = default;
@@ -47,9 +44,9 @@ public:
   virtual ProtocolType type() const PURE;
 
   /*
-   * decodes the dubbo protocol message header.
+   * decodes the jres protocol message header.
    *
-   * @param buffer the currently buffered dubbo data.
+   * @param buffer the currently buffered jres data.
    * @param metadata the meta data of current messages
    * @return ContextSharedPtr save the context data of current messages,
    *                 nullptr if more data is required.
@@ -61,10 +58,10 @@ public:
                                                          MessageMetadataSharedPtr metadata) PURE;
 
   /*
-   * decodes the dubbo protocol message body, potentially invoking callbacks.
+   * decodes the jres protocol message body, potentially invoking callbacks.
    * If successful, the message is removed from the buffer.
    *
-   * @param buffer the currently buffered dubbo data.
+   * @param buffer the currently buffered jres data.
    * @param context save the meta data of current messages.
    * @param metadata the meta data of current messages
    * @return bool true if a complete message was successfully consumed, false if more data
@@ -75,12 +72,12 @@ public:
                           MessageMetadataSharedPtr metadata) PURE;
 
   /*
-   * encodes the dubbo protocol message.
+   * encodes the jres protocol message.
    *
-   * @param buffer save the currently buffered dubbo data.
-   * @param metadata the meta data of dubbo protocol
-   * @param content the body of dubbo protocol message
-   * @param type the type of dubbo protocol response message
+   * @param buffer save the currently buffered jres data.
+   * @param metadata the meta data of jres protocol
+   * @param content the body of jres protocol message
+   * @param type the type of jres protocol response message
    * @return bool true if the protocol coding succeeds.
    */
   virtual bool encode(Buffer::Instance& buffer, const MessageMetadata& metadata,
@@ -94,7 +91,7 @@ protected:
 using ProtocolPtr = std::unique_ptr<Protocol>;
 
 /**
- * Implemented by each Dubbo protocol and registered via Registry::registerFactory or the
+ * Implemented by each Jres protocol and registered via Registry::registerFactory or the
  * convenience class RegisterFactory.
  */
 class NamedProtocolConfigFactory : public Config::UntypedFactory {
@@ -102,13 +99,13 @@ public:
   ~NamedProtocolConfigFactory() override = default;
 
   /**
-   * Create a particular Dubbo protocol.
+   * Create a particular Jres protocol.
    * @param serialization_type the serialization type of the protocol body.
    * @return protocol instance pointer.
    */
   virtual ProtocolPtr createProtocol(SerializationType serialization_type) PURE;
 
-  std::string category() const override { return "envoy.dubbo_proxy.protocols"; }
+  std::string category() const override { return "envoy.jres_proxy.protocols"; }
 
   /**
    * Convenience method to lookup a factory by type.
@@ -141,7 +138,7 @@ private:
   const std::string name_;
 };
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

@@ -1,16 +1,16 @@
 #pragma once
 
-#include "extensions/filters/network/dubbo_proxy/message_impl.h"
-#include "extensions/filters/network/dubbo_proxy/serializer.h"
+#include "extensions/filters/network/jres_proxy/message_impl.h"
+#include "extensions/filters/network/jres_proxy/serializer.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 class RpcInvocationImpl : public RpcInvocationBase {
 public:
-  // TODO(gengleilei) Add parameter data types and implement Dubbo data type mapping.
+  // TODO(gengleilei) Add parameter data types and implement Jres data type mapping.
   using ParameterValueMap = absl::node_hash_map<uint32_t, std::string>;
   using ParameterValueMapPtr = std::unique_ptr<ParameterValueMap>;
 
@@ -56,7 +56,7 @@ private:
   bool has_exception_ = false;
 };
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

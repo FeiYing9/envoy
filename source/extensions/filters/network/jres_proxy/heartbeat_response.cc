@@ -1,12 +1,12 @@
-#include "extensions/filters/network/dubbo_proxy/heartbeat_response.h"
+#include "extensions/filters/network/jres_proxy/heartbeat_response.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
-DubboFilters::DirectResponse::ResponseType
-HeartbeatResponse::encode(MessageMetadata& metadata, DubboProxy::Protocol& protocol,
+JresFilters::DirectResponse::ResponseType
+HeartbeatResponse::encode(MessageMetadata& metadata, JresProxy::Protocol& protocol,
                           Buffer::Instance& buffer) const {
   ASSERT(metadata.responseStatus() == ResponseStatus::Ok);
   ASSERT(metadata.messageType() == MessageType::HeartbeatResponse);
@@ -19,7 +19,7 @@ HeartbeatResponse::encode(MessageMetadata& metadata, DubboProxy::Protocol& proto
   return DirectResponse::ResponseType::SuccessReply;
 }
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

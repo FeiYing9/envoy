@@ -7,14 +7,14 @@
 #include "common/common/empty_string.h"
 #include "common/http/header_map_impl.h"
 
-#include "extensions/filters/network/dubbo_proxy/message.h"
+#include "extensions/filters/network/jres_proxy/message.h"
 
 #include "absl/types/optional.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 class MessageMetadata {
 public:
@@ -65,7 +65,7 @@ private:
   bool is_two_way_{false};
 
   MessageType message_type_{MessageType::Request};
-  ProtocolType proto_type_{ProtocolType::Dubbo};
+  ProtocolType proto_type_{ProtocolType::Jres};
 
   absl::optional<uint8_t> response_status_;
   absl::optional<uint32_t> timeout_;
@@ -79,7 +79,7 @@ private:
 
 using MessageMetadataSharedPtr = std::shared_ptr<MessageMetadata>;
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

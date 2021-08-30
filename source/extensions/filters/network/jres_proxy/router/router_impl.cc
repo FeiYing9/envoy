@@ -1,14 +1,14 @@
-#include "extensions/filters/network/dubbo_proxy/router/router_impl.h"
+#include "extensions/filters/network/Jres_proxy/router/router_impl.h"
 
 #include "envoy/upstream/cluster_manager.h"
 #include "envoy/upstream/thread_local_cluster.h"
 
-#include "extensions/filters/network/dubbo_proxy/app_exception.h"
+#include "extensions/filters/network/Jres_proxy/app_exception.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 namespace Router {
 
 void Router::onDestroy() {
@@ -18,7 +18,7 @@ void Router::onDestroy() {
   cleanup();
 }
 
-void Router::setDecoderFilterCallbacks(DubboFilters::DecoderFilterCallbacks& callbacks) {
+void Router::setDecoderFilterCallbacks(JresFilters::DecoderFilterCallbacks& callbacks) {
   callbacks_ = &callbacks;
 }
 
@@ -28,10 +28,10 @@ FilterStatus Router::onMessageDecoded(MessageMetadataSharedPtr metadata, Context
 
   route_ = callbacks_->route();
   if (!route_) {
-    ENVOY_STREAM_LOG(debug, "dubbo router: no cluster match for interface '{}'", *callbacks_,
+    ENVOY_STREAM_LOG(debug, "Jres router: no cluster match for interface '{}'", *callbacks_,
                      invocation.serviceName());
     callbacks_->sendLocalReply(AppException(ResponseStatus::ServiceNotFound,
-                                            fmt::format("dubbo router: no route for interface '{}'",
+                                            fmt::format("Jres router: no route for interface '{}'",
                                                         invocation.serviceName())),
                                false);
     return FilterStatus::StopIteration;
@@ -42,23 +42,23 @@ FilterStatus Router::onMessageDecoded(MessageMetadataSharedPtr metadata, Context
   Upstream::ThreadLocalCluster* cluster =
       cluster_manager_.getThreadLocalCluster(route_entry_->clusterName());
   if (!cluster) {
-    ENVOY_STREAM_LOG(debug, "dubbo router: unknown cluster '{}'", *callbacks_,
+    ENVOY_STREAM_LOG(debug, "Jres router: unknown cluster '{}'", *callbacks_,
                      route_entry_->clusterName());
     callbacks_->sendLocalReply(
-        AppException(ResponseStatus::ServerError, fmt::format("dubbo router: unknown cluster '{}'",
+        AppException(ResponseStatus::ServerError, fmt::format("Jres router: unknown cluster '{}'",
                                                               route_entry_->clusterName())),
         false);
     return FilterStatus::StopIteration;
   }
 
   cluster_ = cluster->info();
-  ENVOY_STREAM_LOG(debug, "dubbo router: cluster '{}' match for interface '{}'", *callbacks_,
+  ENVOY_STREAM_LOG(debug, "Jres router: cluster '{}' match for interface '{}'", *callbacks_,
                    route_entry_->clusterName(), invocation.serviceName());
 
   if (cluster_->maintenanceMode()) {
     callbacks_->sendLocalReply(
         AppException(ResponseStatus::ServerError,
-                     fmt::format("dubbo router: maintenance mode for cluster '{}'",
+                     fmt::format("Jres router: maintenance mode for cluster '{}'",
                                  route_entry_->clusterName())),
         false);
     return FilterStatus::StopIteration;
@@ -70,12 +70,12 @@ FilterStatus Router::onMessageDecoded(MessageMetadataSharedPtr metadata, Context
     callbacks_->sendLocalReply(
         AppException(
             ResponseStatus::ServerError,
-            fmt::format("dubbo router: no healthy upstream for '{}'", route_entry_->clusterName())),
+            fmt::format("Jres router: no healthy upstream for '{}'", route_entry_->clusterName())),
         false);
     return FilterStatus::StopIteration;
   }
 
-  ENVOY_STREAM_LOG(debug, "dubbo router: decoding request", *callbacks_);
+  ENVOY_STREAM_LOG(debug, "Jres router: decoding request", *callbacks_);
   upstream_request_buffer_.move(ctx->messageOriginData(), ctx->messageSize());
 
   upstream_request_ = std::make_unique<UpstreamRequest>(
@@ -86,7 +86,7 @@ FilterStatus Router::onMessageDecoded(MessageMetadataSharedPtr metadata, Context
 void Router::onUpstreamData(Buffer::Instance& data, bool end_stream) {
   ASSERT(!upstream_request_->response_complete_);
 
-  ENVOY_STREAM_LOG(trace, "dubbo router: reading response: {} bytes", *callbacks_, data.length());
+  ENVOY_STREAM_LOG(trace, "Jres router: reading response: {} bytes", *callbacks_, data.length());
 
   // Handle normal response.
   if (!upstream_request_->response_started_) {
@@ -94,14 +94,14 @@ void Router::onUpstreamData(Buffer::Instance& data, bool end_stream) {
     upstream_request_->response_started_ = true;
   }
 
-  DubboFilters::UpstreamResponseStatus status = callbacks_->upstreamData(data);
-  if (status == DubboFilters::UpstreamResponseStatus::Complete) {
-    ENVOY_STREAM_LOG(debug, "dubbo router: response complete", *callbacks_);
+  JresFilters::UpstreamResponseStatus status = callbacks_->upstreamData(data);
+  if (status == JresFilters::UpstreamResponseStatus::Complete) {
+    ENVOY_STREAM_LOG(debug, "Jres router: response complete", *callbacks_);
     upstream_request_->onResponseComplete();
     cleanup();
     return;
-  } else if (status == DubboFilters::UpstreamResponseStatus::Reset) {
-    ENVOY_STREAM_LOG(debug, "dubbo router: upstream reset", *callbacks_);
+  } else if (status == JresFilters::UpstreamResponseStatus::Reset) {
+    ENVOY_STREAM_LOG(debug, "Jres router: upstream reset", *callbacks_);
     // When the upstreamData function returns Reset,
     // the current stream is already released from the upper layer,
     // so there is no need to call callbacks_->resetStream() to notify
@@ -112,7 +112,7 @@ void Router::onUpstreamData(Buffer::Instance& data, bool end_stream) {
 
   if (end_stream) {
     // Response is incomplete, but no more data is coming.
-    ENVOY_STREAM_LOG(debug, "dubbo router: response underflow", *callbacks_);
+    ENVOY_STREAM_LOG(debug, "Jres router: response underflow", *callbacks_);
     upstream_request_->onResetStream(ConnectionPool::PoolFailureReason::RemoteConnectionFailure);
     upstream_request_->onResponseComplete();
     cleanup();
@@ -122,12 +122,12 @@ void Router::onUpstreamData(Buffer::Instance& data, bool end_stream) {
 void Router::onEvent(Network::ConnectionEvent event) {
   if (!upstream_request_ || upstream_request_->response_complete_) {
     // Client closed connection after completing response.
-    ENVOY_LOG(debug, "dubbo upstream request: the upstream request had completed");
+    ENVOY_LOG(debug, "Jres upstream request: the upstream request had completed");
     return;
   }
 
   if (upstream_request_->stream_reset_ && event == Network::ConnectionEvent::LocalClose) {
-    ENVOY_LOG(debug, "dubbo upstream request: the stream reset");
+    ENVOY_LOG(debug, "Jres upstream request: the stream reset");
     return;
   }
 
@@ -184,14 +184,14 @@ void Router::UpstreamRequest::resetStream() {
     ASSERT(!conn_data_);
     conn_pool_handle_->cancel(Tcp::ConnectionPool::CancelPolicy::Default);
     conn_pool_handle_ = nullptr;
-    ENVOY_LOG(debug, "dubbo upstream request: reset connection pool handler");
+    ENVOY_LOG(debug, "Jres upstream request: reset connection pool handler");
   }
 
   if (conn_data_) {
     ASSERT(!conn_pool_handle_);
     conn_data_->connection().close(Network::ConnectionCloseType::NoFlush);
     conn_data_.reset();
-    ENVOY_LOG(debug, "dubbo upstream request: reset connection data");
+    ENVOY_LOG(debug, "Jres upstream request: reset connection data");
   }
 }
 
@@ -226,7 +226,7 @@ void Router::UpstreamRequest::onPoolFailure(ConnectionPool::PoolFailureReason re
 
 void Router::UpstreamRequest::onPoolReady(Tcp::ConnectionPool::ConnectionDataPtr&& conn_data,
                                           Upstream::HostDescriptionConstSharedPtr host) {
-  ENVOY_LOG(debug, "dubbo upstream request: tcp connection has ready");
+  ENVOY_LOG(debug, "Jres upstream request: tcp connection has ready");
 
   // Only invoke continueDecoding if we'd previously stopped the filter chain.
   bool continue_decoding = conn_pool_handle_ != nullptr;
@@ -241,7 +241,7 @@ void Router::UpstreamRequest::onPoolReady(Tcp::ConnectionPool::ConnectionDataPtr
 }
 
 void Router::UpstreamRequest::onRequestStart(bool continue_decoding) {
-  ENVOY_LOG(debug, "dubbo upstream request: start sending data to the server {}",
+  ENVOY_LOG(debug, "Jres upstream request: start sending data to the server {}",
             upstream_host_->address()->asString());
 
   if (continue_decoding) {
@@ -258,7 +258,7 @@ void Router::UpstreamRequest::onResponseComplete() {
 }
 
 void Router::UpstreamRequest::onUpstreamHostSelected(Upstream::HostDescriptionConstSharedPtr host) {
-  ENVOY_LOG(debug, "dubbo upstream request: selected upstream {}", host->address()->asString());
+  ENVOY_LOG(debug, "Jres upstream request: selected upstream {}", host->address()->asString());
   upstream_host_ = host;
 }
 
@@ -266,7 +266,7 @@ void Router::UpstreamRequest::onResetStream(ConnectionPool::PoolFailureReason re
   if (metadata_->messageType() == MessageType::Oneway) {
     // For oneway requests, we should not attempt a response. Reset the downstream to signal
     // an error.
-    ENVOY_LOG(debug, "dubbo upstream request: the request is oneway, reset downstream stream");
+    ENVOY_LOG(debug, "Jres upstream request: the request is oneway, reset downstream stream");
     parent_.callbacks_->resetStream();
     return;
   }
@@ -277,7 +277,7 @@ void Router::UpstreamRequest::onResetStream(ConnectionPool::PoolFailureReason re
   case ConnectionPool::PoolFailureReason::Overflow:
     parent_.callbacks_->sendLocalReply(
         AppException(ResponseStatus::ServerError,
-                     fmt::format("dubbo upstream request: too many connections")),
+                     fmt::format("Jres upstream request: too many connections")),
         false);
     break;
   case ConnectionPool::PoolFailureReason::LocalConnectionFailure:
@@ -285,21 +285,21 @@ void Router::UpstreamRequest::onResetStream(ConnectionPool::PoolFailureReason re
     // we've already handled any possible downstream response.
     parent_.callbacks_->sendLocalReply(
         AppException(ResponseStatus::ServerError,
-                     fmt::format("dubbo upstream request: local connection failure '{}'",
+                     fmt::format("Jres upstream request: local connection failure '{}'",
                                  upstream_host_->address()->asString())),
         false);
     break;
   case ConnectionPool::PoolFailureReason::RemoteConnectionFailure:
     parent_.callbacks_->sendLocalReply(
         AppException(ResponseStatus::ServerError,
-                     fmt::format("dubbo upstream request: remote connection failure '{}'",
+                     fmt::format("Jres upstream request: remote connection failure '{}'",
                                  upstream_host_->address()->asString())),
         false);
     break;
   case ConnectionPool::PoolFailureReason::Timeout:
     parent_.callbacks_->sendLocalReply(
         AppException(ResponseStatus::ServerError,
-                     fmt::format("dubbo upstream request: connection failure '{}' due to timeout",
+                     fmt::format("Jres upstream request: connection failure '{}' due to timeout",
                                  upstream_host_->address()->asString())),
         false);
     break;
@@ -316,7 +316,7 @@ void Router::UpstreamRequest::onResetStream(ConnectionPool::PoolFailureReason re
 }
 
 } // namespace Router
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

@@ -1,16 +1,16 @@
 #pragma once
 
-#include "extensions/filters/network/dubbo_proxy/serializer.h"
+#include "extensions/filters/network/jres_proxy/serializer.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
-class DubboHessian2SerializerImpl : public Serializer {
+namespace JresProxy {
+class JresHessian2SerializerImpl : public Serializer {
 public:
-  ~DubboHessian2SerializerImpl() override = default;
+  ~JresHessian2SerializerImpl() override = default;
   const std::string& name() const override {
-    return ProtocolSerializerNames::get().fromType(ProtocolType::Dubbo, type());
+    return ProtocolSerializerNames::get().fromType(ProtocolType::Jres, type());
   }
   SerializationType type() const override { return SerializationType::Hessian2; }
 
@@ -24,7 +24,7 @@ public:
                             RpcResponseType type) override;
 };
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

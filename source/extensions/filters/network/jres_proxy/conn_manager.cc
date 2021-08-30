@@ -1,4 +1,4 @@
-#include "extensions/filters/network/dubbo_proxy/conn_manager.h"
+#include "extensions/filters/network/jres_proxy/conn_manager.h"
 
 #include <cstdint>
 
@@ -6,15 +6,15 @@
 
 #include "common/common/fmt.h"
 
-#include "extensions/filters/network/dubbo_proxy/app_exception.h"
-#include "extensions/filters/network/dubbo_proxy/dubbo_hessian2_serializer_impl.h"
-#include "extensions/filters/network/dubbo_proxy/dubbo_protocol_impl.h"
-#include "extensions/filters/network/dubbo_proxy/heartbeat_response.h"
+#include "extensions/filters/network/jres_proxy/app_exception.h"
+#include "extensions/filters/network/jres_proxy/jres_hessian2_serializer_impl.h"
+#include "extensions/filters/network/jres_proxy/jres_protocol_impl.h"
+#include "extensions/filters/network/jres_proxy/heartbeat_response.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 constexpr uint32_t BufferLimit = UINT32_MAX;
 
@@ -25,7 +25,7 @@ ConnectionManager::ConnectionManager(Config& config, Random::RandomGenerator& ra
       decoder_(std::make_unique<RequestDecoder>(*protocol_, *this)) {}
 
 Network::FilterStatus ConnectionManager::onData(Buffer::Instance& data, bool end_stream) {
-  ENVOY_LOG(trace, "dubbo: read {} bytes", data.length());
+  ENVOY_LOG(trace, "jres: read {} bytes", data.length());
   request_buffer_.move(data);
   dispatch();
 
@@ -45,7 +45,7 @@ Network::FilterStatus ConnectionManager::onData(Buffer::Instance& data, bool end
       }
     }
 
-    ENVOY_LOG(debug, "dubbo: end data processing");
+    ENVOY_LOG(debug, "jres: end data processing");
     resetAllMessages(false);
     read_callbacks_->connection().close(Network::ConnectionCloseType::FlushWrite);
   }
@@ -79,7 +79,7 @@ void ConnectionManager::onBelowWriteBufferLowWatermark() {
 }
 
 StreamHandler& ConnectionManager::newStream() {
-  ENVOY_LOG(debug, "dubbo: create the new decoder event handler");
+  ENVOY_LOG(debug, "jres: create the new decoder event handler");
 
   ActiveMessagePtr new_message(std::make_unique<ActiveMessage>(*this));
   new_message->createFilterChain();
@@ -91,7 +91,7 @@ void ConnectionManager::onHeartbeat(MessageMetadataSharedPtr metadata) {
   stats_.request_event_.inc();
 
   if (read_callbacks_->connection().state() != Network::Connection::State::Open) {
-    ENVOY_LOG(warn, "dubbo: downstream connection is closed or closing");
+    ENVOY_LOG(warn, "jres: downstream connection is closed or closing");
     return;
   }
 
@@ -107,12 +107,12 @@ void ConnectionManager::onHeartbeat(MessageMetadataSharedPtr metadata) {
 
 void ConnectionManager::dispatch() {
   if (0 == request_buffer_.length()) {
-    ENVOY_LOG(warn, "dubbo: it's empty data");
+    ENVOY_LOG(warn, "jres: it's empty data");
     return;
   }
 
   if (stopped_) {
-    ENVOY_CONN_LOG(debug, "dubbo: dubbo filter stopped", read_callbacks_->connection());
+    ENVOY_CONN_LOG(debug, "jres: jres filter stopped", read_callbacks_->connection());
     return;
   }
 
@@ -123,7 +123,7 @@ void ConnectionManager::dispatch() {
     }
     return;
   } catch (const EnvoyException& ex) {
-    ENVOY_CONN_LOG(error, "dubbo error: {}", read_callbacks_->connection(), ex.what());
+    ENVOY_CONN_LOG(error, "jres error: {}", read_callbacks_->connection(), ex.what());
     read_callbacks_->connection().close(Network::ConnectionCloseType::NoFlush);
     stats_.request_decoding_error_.inc();
   }
@@ -131,21 +131,21 @@ void ConnectionManager::dispatch() {
 }
 
 void ConnectionManager::sendLocalReply(MessageMetadata& metadata,
-                                       const DubboFilters::DirectResponse& response,
+                                       const JresFilters::DirectResponse& response,
                                        bool end_stream) {
   if (read_callbacks_->connection().state() != Network::Connection::State::Open) {
     return;
   }
 
-  DubboFilters::DirectResponse::ResponseType result =
-      DubboFilters::DirectResponse::ResponseType::ErrorReply;
+  JresFilters::DirectResponse::ResponseType result =
+      JresFilters::DirectResponse::ResponseType::ErrorReply;
 
   try {
     Buffer::OwnedImpl buffer;
     result = response.encode(metadata, *protocol_, buffer);
     read_callbacks_->connection().write(buffer, end_stream);
   } catch (const EnvoyException& ex) {
-    ENVOY_CONN_LOG(error, "dubbo error: {}", read_callbacks_->connection(), ex.what());
+    ENVOY_CONN_LOG(error, "jres error: {}", read_callbacks_->connection(), ex.what());
   }
 
   if (end_stream) {
@@ -153,13 +153,13 @@ void ConnectionManager::sendLocalReply(MessageMetadata& metadata,
   }
 
   switch (result) {
-  case DubboFilters::DirectResponse::ResponseType::SuccessReply:
+  case JresFilters::DirectResponse::ResponseType::SuccessReply:
     stats_.local_response_success_.inc();
     break;
-  case DubboFilters::DirectResponse::ResponseType::ErrorReply:
+  case JresFilters::DirectResponse::ResponseType::ErrorReply:
     stats_.local_response_error_.inc();
     break;
-  case DubboFilters::DirectResponse::ResponseType::Exception:
+  case JresFilters::DirectResponse::ResponseType::Exception:
     stats_.local_response_business_exception_.inc();
     break;
   default:
@@ -168,7 +168,7 @@ void ConnectionManager::sendLocalReply(MessageMetadata& metadata,
 }
 
 void ConnectionManager::continueDecoding() {
-  ENVOY_CONN_LOG(debug, "dubbo filter continued", read_callbacks_->connection());
+  ENVOY_CONN_LOG(debug, "jres filter continued", read_callbacks_->connection());
   stopped_ = false;
   dispatch();
 
@@ -202,7 +202,7 @@ void ConnectionManager::resetAllMessages(bool local_reset) {
   }
 }
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

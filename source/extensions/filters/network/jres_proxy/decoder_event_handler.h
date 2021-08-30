@@ -5,13 +5,13 @@
 
 #include "common/buffer/buffer_impl.h"
 
-#include "extensions/filters/network/dubbo_proxy/message.h"
-#include "extensions/filters/network/dubbo_proxy/metadata.h"
+#include "extensions/filters/network/jres_proxy/message.h"
+#include "extensions/filters/network/jres_proxy/metadata.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 enum class FilterStatus : uint8_t {
   // Continue filter chain iteration.
@@ -89,7 +89,7 @@ public:
 class RequestDecoderCallbacks : public DecoderCallbacksBase {};
 class ResponseDecoderCallbacks : public DecoderCallbacksBase {};
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

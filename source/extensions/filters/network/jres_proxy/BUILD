@@ -46,9 +46,9 @@ envoy_cc_library(
 )
 
 envoy_cc_library(
-    name = "dubbo_protocol_impl_lib",
-    srcs = ["dubbo_protocol_impl.cc"],
-    hdrs = ["dubbo_protocol_impl.h"],
+    name = "jres_protocol_impl_lib",
+    srcs = ["jres_protocol_impl.cc"],
+    hdrs = ["jres_protocol_impl.h"],
     deps = [
         ":protocol_interface",
         "//include/envoy/buffer:buffer_interface",
@@ -76,10 +76,10 @@ envoy_cc_library(
 )
 
 envoy_cc_library(
-    name = "dubbo_hessian2_serializer_impl_lib",
-    srcs = ["dubbo_hessian2_serializer_impl.cc"],
+    name = "jres_hessian2_serializer_impl_lib",
+    srcs = ["jres_hessian2_serializer_impl.cc"],
     hdrs = [
-        "dubbo_hessian2_serializer_impl.h",
+        "jres_hessian2_serializer_impl.h",
     ],
     deps = [
         ":buffer_helper_lib",
@@ -95,8 +95,8 @@ envoy_cc_library(
     hdrs = ["decoder.h"],
     deps = [
         ":decoder_events_lib",
-        ":dubbo_hessian2_serializer_impl_lib",
-        ":dubbo_protocol_impl_lib",
+        ":jres_hessian2_serializer_impl_lib",
+        ":jres_protocol_impl_lib",
         "//source/common/buffer:buffer_lib",
         "//source/common/common:logger_lib",
     ],
@@ -117,12 +117,12 @@ envoy_cc_extension(
         "//source/common/config:utility_lib",
         "//source/extensions/filters/network:well_known_names",
         "//source/extensions/filters/network/common:factory_base_lib",
-        "//source/extensions/filters/network/dubbo_proxy/filters:factory_base_lib",
-        "//source/extensions/filters/network/dubbo_proxy/filters:well_known_names",
-        "//source/extensions/filters/network/dubbo_proxy/router:config",
-        "//source/extensions/filters/network/dubbo_proxy/router:route_matcher",
-        "//source/extensions/filters/network/dubbo_proxy/router:router_lib",
-        "@envoy_api//envoy/extensions/filters/network/dubbo_proxy/v3:pkg_cc_proto",
+        "//source/extensions/filters/network/jres_proxy/filters:factory_base_lib",
+        "//source/extensions/filters/network/jres_proxy/filters:well_known_names",
+        "//source/extensions/filters/network/jres_proxy/router:config",
+        "//source/extensions/filters/network/jres_proxy/router:route_matcher",
+        "//source/extensions/filters/network/jres_proxy/router:router_lib",
+        "@envoy_api//envoy/extensions/filters/network/jres_proxy/v3:pkg_cc_proto",
     ],
 )
 
@@ -179,7 +179,7 @@ envoy_cc_library(
         ":serializer_interface",
         "//include/envoy/buffer:buffer_interface",
         "//source/common/buffer:buffer_lib",
-        "//source/extensions/filters/network/dubbo_proxy/filters:filter_interface",
+        "//source/extensions/filters/network/jres_proxy/filters:filter_interface",
     ],
 )
 
@@ -192,7 +192,7 @@ envoy_cc_library(
         ":protocol_interface",
         ":serializer_interface",
         "//include/envoy/buffer:buffer_interface",
-        "//source/extensions/filters/network/dubbo_proxy/filters:filter_interface",
+        "//source/extensions/filters/network/jres_proxy/filters:filter_interface",
     ],
 )
 
@@ -210,8 +210,8 @@ envoy_cc_library(
         ":app_exception_lib",
         ":decoder_events_lib",
         ":decoder_lib",
-        ":dubbo_hessian2_serializer_impl_lib",
-        ":dubbo_protocol_impl_lib",
+        ":jres_hessian2_serializer_impl_lib",
+        ":jres_protocol_impl_lib",
         ":heartbeat_response_lib",
         ":stats_lib",
         "//include/envoy/event:deferred_deletable",
@@ -228,8 +228,8 @@ envoy_cc_library(
         "//source/common/network:filter_lib",
         "//source/common/stats:timespan_lib",
         "//source/common/stream_info:stream_info_lib",
-        "//source/extensions/filters/network/dubbo_proxy/filters:filter_interface",
-        "//source/extensions/filters/network/dubbo_proxy/router:router_interface",
-        "@envoy_api//envoy/extensions/filters/network/dubbo_proxy/v3:pkg_cc_proto",
+        "//source/extensions/filters/network/jres_proxy/filters:filter_interface",
+        "//source/extensions/filters/network/jres_proxy/router:router_interface",
+        "@envoy_api//envoy/extensions/filters/network/jres_proxy/v3:pkg_cc_proto",
     ],
 )

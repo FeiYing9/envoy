@@ -13,7 +13,7 @@
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 /**
  * Stream reset reasons.
@@ -37,10 +37,10 @@ enum class StreamResetReason : uint8_t {
 
 // Supported protocol type
 enum class ProtocolType : uint8_t {
-  Dubbo = 1,
+  Jres = 1,
 
   // ATTENTION: MAKE SURE THIS REMAINS EQUAL TO THE LAST PROTOCOL TYPE
-  LastProtocolType = Dubbo,
+  LastProtocolType = Jres,
 };
 
 // Supported serialization type
@@ -62,8 +62,7 @@ enum class MessageType : uint8_t {
 };
 
 /**
- * Dubbo protocol response status types.
- * See org.apache.dubbo.remoting.exchange
+ * Jres protocol response status types.
  */
 enum class ResponseStatus : uint8_t {
   Ok = 20,
@@ -113,7 +112,7 @@ using ContextSharedPtr = std::shared_ptr<Context>;
 /**
  * RpcInvocation represent an rpc call
  * See
- * https://github.com/apache/incubator-dubbo/blob/master/dubbo-rpc/dubbo-rpc-api/src/main/java/org/apache/dubbo/rpc/RpcInvocation.java
+ * https://github.com/apache/incubator-jres/blob/master/jres-rpc/jres-rpc-api/src/main/java/org/apache/jres/rpc/RpcInvocation.java
  */
 class RpcInvocation {
 public:
@@ -130,7 +129,7 @@ using RpcInvocationSharedPtr = std::shared_ptr<RpcInvocation>;
 /**
  * RpcResult represent the result of an rpc call
  * See
- * https://github.com/apache/incubator-dubbo/blob/master/dubbo-rpc/dubbo-rpc-api/src/main/java/org/apache/dubbo/rpc/RpcResult.java
+ * https://github.com/apache/incubator-jres/blob/master/jres-rpc/jres-rpc-api/src/main/java/org/apache/jres/rpc/RpcResult.java
  */
 class RpcResult {
 public:
@@ -140,7 +139,7 @@ public:
 
 using RpcResultSharedPtr = std::shared_ptr<RpcResult>;
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

@@ -5,14 +5,14 @@
 #include "common/buffer/buffer_impl.h"
 #include "common/common/logger.h"
 
-#include "extensions/filters/network/dubbo_proxy/decoder_event_handler.h"
-#include "extensions/filters/network/dubbo_proxy/protocol.h"
-#include "extensions/filters/network/dubbo_proxy/serializer.h"
+#include "extensions/filters/network/jres_proxy/decoder_event_handler.h"
+#include "extensions/filters/network/jres_proxy/protocol.h"
+#include "extensions/filters/network/jres_proxy/serializer.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 #define ALL_PROTOCOL_STATES(FUNCTION)                                                              \
   FUNCTION(StopIteration)                                                                          \
@@ -22,7 +22,7 @@ namespace DubboProxy {
   FUNCTION(Done)
 
 /**
- * ProtocolState represents a set of states used in a state machine to decode Dubbo requests
+ * ProtocolState represents a set of states used in a state machine to decode Jres requests
  * and responses.
  */
 enum class ProtocolState { ALL_PROTOCOL_STATES(GENERATE_ENUM) };
@@ -61,7 +61,7 @@ struct ActiveStream {
 
 using ActiveStreamPtr = std::unique_ptr<ActiveStream>;
 
-class DecoderStateMachine : public Logger::Loggable<Logger::Id::dubbo> {
+class DecoderStateMachine : public Logger::Loggable<Logger::Id::jres> {
 public:
   class Delegate {
   public:
@@ -120,7 +120,7 @@ private:
 using DecoderStateMachinePtr = std::unique_ptr<DecoderStateMachine>;
 
 class DecoderBase : public DecoderStateMachine::Delegate,
-                    public Logger::Loggable<Logger::Id::dubbo> {
+                    public Logger::Loggable<Logger::Id::jres> {
 public:
   DecoderBase(Protocol& protocol);
   ~DecoderBase() override;
@@ -128,8 +128,8 @@ public:
   /**
    * Drains data from the given buffer
    *
-   * @param data a Buffer containing Dubbo protocol data
-   * @throw EnvoyException on Dubbo protocol errors
+   * @param data a Buffer containing Jres protocol data
+   * @throw EnvoyException on Jres protocol errors
    */
   FilterStatus onData(Buffer::Instance& data, bool& buffer_underflow);
 
@@ -186,7 +186,7 @@ public:
 
 using ResponseDecoderPtr = std::unique_ptr<ResponseDecoder>;
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

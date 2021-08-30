@@ -1,26 +1,26 @@
-#include "extensions/filters/network/dubbo_proxy/active_message.h"
+#include "extensions/filters/network/jres_proxy/active_message.h"
 
 #include "common/stats/timespan_impl.h"
 
-#include "extensions/filters/network/dubbo_proxy/app_exception.h"
-#include "extensions/filters/network/dubbo_proxy/conn_manager.h"
+#include "extensions/filters/network/jres_proxy/app_exception.h"
+#include "extensions/filters/network/jres_proxy/conn_manager.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 // class ActiveResponseDecoder
-ActiveResponseDecoder::ActiveResponseDecoder(ActiveMessage& parent, DubboFilterStats& stats,
+ActiveResponseDecoder::ActiveResponseDecoder(ActiveMessage& parent, JresFilterStats& stats,
                                              Network::Connection& connection,
                                              ProtocolPtr&& protocol)
     : parent_(parent), stats_(stats), response_connection_(connection),
       protocol_(std::move(protocol)),
       decoder_(std::make_unique<ResponseDecoder>(*protocol_, *this)), complete_(false),
-      response_status_(DubboFilters::UpstreamResponseStatus::MoreData) {}
+      response_status_(JresFilters::UpstreamResponseStatus::MoreData) {}
 
-DubboFilters::UpstreamResponseStatus ActiveResponseDecoder::onData(Buffer::Instance& data) {
-  ENVOY_LOG(debug, "dubbo response: the received reply data length is {}", data.length());
+JresFilters::UpstreamResponseStatus ActiveResponseDecoder::onData(Buffer::Instance& data) {
+  ENVOY_LOG(debug, "jres response: the received reply data length is {}", data.length());
 
   bool underflow = false;
   decoder_->onData(data, underflow);
@@ -37,7 +37,7 @@ void ActiveResponseDecoder::onStreamDecoded(MessageMetadataSharedPtr metadata,
 
   metadata_ = metadata;
   if (applyMessageEncodedFilters(metadata, ctx) != FilterStatus::Continue) {
-    response_status_ = DubboFilters::UpstreamResponseStatus::Complete;
+    response_status_ = JresFilters::UpstreamResponseStatus::Complete;
     return;
   }
 
@@ -47,7 +47,7 @@ void ActiveResponseDecoder::onStreamDecoded(MessageMetadataSharedPtr metadata,
 
   response_connection_.write(ctx->messageOriginData(), false);
   ENVOY_LOG(debug,
-            "dubbo response: the upstream response message has been forwarded to the downstream");
+            "jres response: the upstream response message has been forwarded to the downstream");
 
   stats_.response_.inc();
   stats_.response_decoding_success_.inc();
@@ -61,21 +61,21 @@ void ActiveResponseDecoder::onStreamDecoded(MessageMetadataSharedPtr metadata,
     break;
   default:
     stats_.response_error_.inc();
-    ENVOY_LOG(error, "dubbo response status: {}", static_cast<uint8_t>(metadata->responseStatus()));
+    ENVOY_LOG(error, "jres response status: {}", static_cast<uint8_t>(metadata->responseStatus()));
     break;
   }
 
   complete_ = true;
-  response_status_ = DubboFilters::UpstreamResponseStatus::Complete;
+  response_status_ = JresFilters::UpstreamResponseStatus::Complete;
 
-  ENVOY_LOG(debug, "dubbo response: complete processing of upstream response messages, id is {}",
+  ENVOY_LOG(debug, "jres response: complete processing of upstream response messages, id is {}",
             metadata->requestId());
 }
 
 FilterStatus ActiveResponseDecoder::applyMessageEncodedFilters(MessageMetadataSharedPtr metadata,
                                                                ContextSharedPtr ctx) {
   parent_.encoder_filter_action_ = [metadata,
-                                    ctx](DubboFilters::EncoderFilter* filter) -> FilterStatus {
+                                    ctx](JresFilters::EncoderFilter* filter) -> FilterStatus {
     return filter->onMessageEncoded(metadata, ctx);
   };
 
@@ -85,7 +85,7 @@ FilterStatus ActiveResponseDecoder::applyMessageEncodedFilters(MessageMetadataSh
   case FilterStatus::StopIteration:
     break;
   case FilterStatus::Retry:
-    response_status_ = DubboFilters::UpstreamResponseStatus::Retry;
+    response_status_ = JresFilters::UpstreamResponseStatus::Retry;
     decoder_->reset();
     break;
   default:
@@ -121,7 +121,7 @@ StreamInfo::StreamInfo& ActiveMessageFilterBase::streamInfo() { return parent_.s
 
 // class ActiveMessageDecoderFilter
 ActiveMessageDecoderFilter::ActiveMessageDecoderFilter(ActiveMessage& parent,
-                                                       DubboFilters::DecoderFilterSharedPtr filter,
+                                                       JresFilters::DecoderFilterSharedPtr filter,
                                                        bool dual_filter)
     : ActiveMessageFilterBase(parent, dual_filter), handle_(filter) {}
 
@@ -135,7 +135,7 @@ void ActiveMessageDecoderFilter::continueDecoding() {
   }
   const FilterStatus status = parent_.applyDecoderFilters(this, state);
   if (status == FilterStatus::Continue) {
-    ENVOY_LOG(debug, "dubbo response: start upstream");
+    ENVOY_LOG(debug, "jres response: start upstream");
     // All filters have been executed for the current decoder state.
     if (parent_.pendingStreamDecoded()) {
       // If the filter stack was paused during messageEnd, handle end-of-request details.
@@ -145,14 +145,14 @@ void ActiveMessageDecoderFilter::continueDecoding() {
   }
 }
 
-void ActiveMessageDecoderFilter::sendLocalReply(const DubboFilters::DirectResponse& response,
+void ActiveMessageDecoderFilter::sendLocalReply(const JresFilters::DirectResponse& response,
                                                 bool end_stream) {
   parent_.sendLocalReply(response, end_stream);
 }
 
 void ActiveMessageDecoderFilter::startUpstreamResponse() { parent_.startUpstreamResponse(); }
 
-DubboFilters::UpstreamResponseStatus
+JresFilters::UpstreamResponseStatus
 ActiveMessageDecoderFilter::upstreamData(Buffer::Instance& buffer) {
   return parent_.upstreamData(buffer);
 }
@@ -163,7 +163,7 @@ void ActiveMessageDecoderFilter::resetDownstreamConnection() {
 
 // class ActiveMessageEncoderFilter
 ActiveMessageEncoderFilter::ActiveMessageEncoderFilter(ActiveMessage& parent,
-                                                       DubboFilters::EncoderFilterSharedPtr filter,
+                                                       JresFilters::EncoderFilterSharedPtr filter,
                                                        bool dual_filter)
     : ActiveMessageFilterBase(parent, dual_filter), handle_(filter) {}
 
@@ -246,20 +246,20 @@ void ActiveMessage::onStreamDecoded(MessageMetadataSharedPtr metadata, ContextSh
 
   metadata_ = metadata;
   context_ = ctx;
-  filter_action_ = [metadata, ctx](DubboFilters::DecoderFilter* filter) -> FilterStatus {
+  filter_action_ = [metadata, ctx](JresFilters::DecoderFilter* filter) -> FilterStatus {
     return filter->onMessageDecoded(metadata, ctx);
   };
 
   auto status = applyDecoderFilters(nullptr, FilterIterationStartState::CanStartFromCurrent);
   if (status == FilterStatus::StopIteration) {
-    ENVOY_LOG(debug, "dubbo request: stop calling decoder filter, id is {}", metadata->requestId());
+    ENVOY_LOG(debug, "jres request: stop calling decoder filter, id is {}", metadata->requestId());
     pending_stream_decoded_ = true;
     return;
   }
 
   finalizeRequest();
 
-  ENVOY_LOG(debug, "dubbo request: complete processing of downstream request messages, id is {}",
+  ENVOY_LOG(debug, "jres request: complete processing of downstream request messages, id is {}",
             metadata->requestId());
 }
 
@@ -288,13 +288,13 @@ void ActiveMessage::createFilterChain() {
   parent_.config().filterFactory().createFilterChain(*this);
 }
 
-DubboProxy::Router::RouteConstSharedPtr ActiveMessage::route() {
+JresProxy::Router::RouteConstSharedPtr ActiveMessage::route() {
   if (cached_route_) {
     return cached_route_.value();
   }
 
   if (metadata_ != nullptr) {
-    DubboProxy::Router::RouteConstSharedPtr route =
+    JresProxy::Router::RouteConstSharedPtr route =
         parent_.config().routerConfig().route(*metadata_, stream_id_);
     cached_route_ = route;
     return cached_route_.value();
@@ -346,7 +346,7 @@ FilterStatus ActiveMessage::applyEncoderFilters(ActiveMessageEncoderFilter* filt
   return FilterStatus::Continue;
 }
 
-void ActiveMessage::sendLocalReply(const DubboFilters::DirectResponse& response, bool end_stream) {
+void ActiveMessage::sendLocalReply(const JresFilters::DirectResponse& response, bool end_stream) {
   ASSERT(metadata_);
   metadata_->setRequestId(request_id_);
   parent_.sendLocalReply(*metadata_, response, end_stream);
@@ -359,7 +359,7 @@ void ActiveMessage::sendLocalReply(const DubboFilters::DirectResponse& response,
 }
 
 void ActiveMessage::startUpstreamResponse() {
-  ENVOY_LOG(debug, "dubbo response: start upstream");
+  ENVOY_LOG(debug, "jres response: start upstream");
 
   ASSERT(response_decoder_ == nullptr);
 
@@ -371,35 +371,35 @@ void ActiveMessage::startUpstreamResponse() {
       *this, parent_.stats(), parent_.connection(), std::move(protocol));
 }
 
-DubboFilters::UpstreamResponseStatus ActiveMessage::upstreamData(Buffer::Instance& buffer) {
+JresFilters::UpstreamResponseStatus ActiveMessage::upstreamData(Buffer::Instance& buffer) {
   ASSERT(response_decoder_ != nullptr);
 
   try {
     auto status = response_decoder_->onData(buffer);
-    if (status == DubboFilters::UpstreamResponseStatus::Complete) {
+    if (status == JresFilters::UpstreamResponseStatus::Complete) {
       if (requestId() != response_decoder_->requestId()) {
-        throw EnvoyException(fmt::format("dubbo response: request ID is not equal, {}:{}",
+        throw EnvoyException(fmt::format("jres response: request ID is not equal, {}:{}",
                                          requestId(), response_decoder_->requestId()));
       }
 
       // Completed upstream response.
       parent_.deferredMessage(*this);
-    } else if (status == DubboFilters::UpstreamResponseStatus::Retry) {
+    } else if (status == JresFilters::UpstreamResponseStatus::Retry) {
       response_decoder_.reset();
     }
 
     return status;
   } catch (const DownstreamConnectionCloseException& ex) {
-    ENVOY_CONN_LOG(error, "dubbo response: exception ({})", parent_.connection(), ex.what());
+    ENVOY_CONN_LOG(error, "jres response: exception ({})", parent_.connection(), ex.what());
     onReset();
     parent_.stats().response_error_caused_connection_close_.inc();
-    return DubboFilters::UpstreamResponseStatus::Reset;
+    return JresFilters::UpstreamResponseStatus::Reset;
   } catch (const EnvoyException& ex) {
-    ENVOY_CONN_LOG(error, "dubbo response: exception ({})", parent_.connection(), ex.what());
+    ENVOY_CONN_LOG(error, "jres response: exception ({})", parent_.connection(), ex.what());
     parent_.stats().response_decoding_error_.inc();
 
     onError(ex.what());
-    return DubboFilters::UpstreamResponseStatus::Reset;
+    return JresFilters::UpstreamResponseStatus::Reset;
   }
 }
 
@@ -429,27 +429,27 @@ Event::Dispatcher& ActiveMessage::dispatcher() { return parent_.connection().dis
 
 const Network::Connection* ActiveMessage::connection() const { return &parent_.connection(); }
 
-void ActiveMessage::addDecoderFilter(DubboFilters::DecoderFilterSharedPtr filter) {
+void ActiveMessage::addDecoderFilter(JresFilters::DecoderFilterSharedPtr filter) {
   addDecoderFilterWorker(filter, false);
 }
 
-void ActiveMessage::addEncoderFilter(DubboFilters::EncoderFilterSharedPtr filter) {
+void ActiveMessage::addEncoderFilter(JresFilters::EncoderFilterSharedPtr filter) {
   addEncoderFilterWorker(filter, false);
 }
 
-void ActiveMessage::addFilter(DubboFilters::CodecFilterSharedPtr filter) {
+void ActiveMessage::addFilter(JresFilters::CodecFilterSharedPtr filter) {
   addDecoderFilterWorker(filter, true);
   addEncoderFilterWorker(filter, true);
 }
 
-void ActiveMessage::addDecoderFilterWorker(DubboFilters::DecoderFilterSharedPtr filter,
+void ActiveMessage::addDecoderFilterWorker(JresFilters::DecoderFilterSharedPtr filter,
                                            bool dual_filter) {
   ActiveMessageDecoderFilterPtr wrapper =
       std::make_unique<ActiveMessageDecoderFilter>(*this, filter, dual_filter);
   filter->setDecoderFilterCallbacks(*wrapper);
   LinkedList::moveIntoListBack(std::move(wrapper), decoder_filters_);
 }
-void ActiveMessage::addEncoderFilterWorker(DubboFilters::EncoderFilterSharedPtr filter,
+void ActiveMessage::addEncoderFilterWorker(JresFilters::EncoderFilterSharedPtr filter,
                                            bool dual_filter) {
   ActiveMessageEncoderFilterPtr wrapper =
       std::make_unique<ActiveMessageEncoderFilter>(*this, filter, dual_filter);
@@ -472,7 +472,7 @@ void ActiveMessage::onError(const std::string& what) {
   parent_.deferredMessage(*this);
 }
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

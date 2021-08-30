@@ -1,31 +1,31 @@
-#include "extensions/filters/network/dubbo_proxy/router/route_matcher.h"
+#include "extensions/filters/network/Jres_proxy/router/route_matcher.h"
 
 #include "envoy/config/route/v3/route_components.pb.h"
-#include "envoy/extensions/filters/network/dubbo_proxy/v3/route.pb.h"
+#include "envoy/extensions/filters/network/Jres_proxy/v3/route.pb.h"
 
 #include "common/protobuf/utility.h"
 
-#include "extensions/filters/network/dubbo_proxy/serializer_impl.h"
+#include "extensions/filters/network/Jres_proxy/serializer_impl.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 namespace Router {
 
 RouteEntryImplBase::RouteEntryImplBase(
-    const envoy::extensions::filters::network::dubbo_proxy::v3::Route& route)
+    const envoy::extensions::filters::network::Jres_proxy::v3::Route& route)
     : cluster_name_(route.route().cluster()),
       config_headers_(Http::HeaderUtility::buildHeaderDataVector(route.match().headers())) {
   if (route.route().cluster_specifier_case() ==
-      envoy::extensions::filters::network::dubbo_proxy::v3::RouteAction::ClusterSpecifierCase::
+      envoy::extensions::filters::network::Jres_proxy::v3::RouteAction::ClusterSpecifierCase::
           kWeightedClusters) {
     total_cluster_weight_ = 0UL;
     for (const auto& cluster : route.route().weighted_clusters().clusters()) {
       weighted_clusters_.emplace_back(std::make_shared<WeightedClusterEntry>(*this, cluster));
       total_cluster_weight_ += weighted_clusters_.back()->clusterWeight();
     }
-    ENVOY_LOG(debug, "dubbo route matcher: weighted_clusters_size {}", weighted_clusters_.size());
+    ENVOY_LOG(debug, "Jres route matcher: weighted_clusters_size {}", weighted_clusters_.size());
   }
 }
 
@@ -35,7 +35,7 @@ const RouteEntry* RouteEntryImplBase::routeEntry() const { return this; }
 
 RouteConstSharedPtr RouteEntryImplBase::clusterEntry(uint64_t random_value) const {
   if (weighted_clusters_.empty()) {
-    ENVOY_LOG(debug, "dubbo route matcher: weighted_clusters_size {}", weighted_clusters_.size());
+    ENVOY_LOG(debug, "Jres route matcher: weighted_clusters_size {}", weighted_clusters_.size());
     return shared_from_this();
   }
 
@@ -44,7 +44,7 @@ RouteConstSharedPtr RouteEntryImplBase::clusterEntry(uint64_t random_value) cons
 }
 
 bool RouteEntryImplBase::headersMatch(const Http::HeaderMap& headers) const {
-  ENVOY_LOG(debug, "dubbo route matcher: headers size {}, metadata headers size {}",
+  ENVOY_LOG(debug, "Jres route matcher: headers size {}, metadata headers size {}",
             config_headers_.size(), headers.size());
   return Http::HeaderUtility::matchHeaders(headers, config_headers_);
 }
@@ -55,7 +55,7 @@ RouteEntryImplBase::WeightedClusterEntry::WeightedClusterEntry(const RouteEntryI
       cluster_weight_(PROTOBUF_GET_WRAPPED_REQUIRED(cluster, weight)) {}
 
 ParameterRouteEntryImpl::ParameterRouteEntryImpl(
-    const envoy::extensions::filters::network::dubbo_proxy::v3::Route& route)
+    const envoy::extensions::filters::network::Jres_proxy::v3::Route& route)
     : RouteEntryImplBase(route) {
   for (auto& config : route.match().method().params_match()) {
     parameter_data_list_.emplace_back(config.first, config.second);
@@ -88,19 +88,19 @@ RouteConstSharedPtr ParameterRouteEntryImpl::matches(const MessageMetadata& meta
     return nullptr;
   }
 
-  ENVOY_LOG(debug, "dubbo route matcher: parameter name match");
+  ENVOY_LOG(debug, "Jres route matcher: parameter name match");
   for (auto& config_data : parameter_data_list_) {
     const std::string& data = invocation->getParameterValue(config_data.index_);
     if (data.empty()) {
       ENVOY_LOG(debug,
-                "dubbo route matcher: parameter matching failed, there are no parameters in the "
+                "Jres route matcher: parameter matching failed, there are no parameters in the "
                 "user request, index '{}'",
                 config_data.index_);
       return nullptr;
     }
 
     if (!matchParameter(data, config_data)) {
-      ENVOY_LOG(debug, "dubbo route matcher: parameter matching failed, index '{}', value '{}'",
+      ENVOY_LOG(debug, "Jres route matcher: parameter matching failed, index '{}', value '{}'",
                 config_data.index_, data);
       return nullptr;
     }
@@ -129,7 +129,7 @@ ParameterRouteEntryImpl::ParameterData::ParameterData(uint32_t index,
 }
 
 MethodRouteEntryImpl::MethodRouteEntryImpl(
-    const envoy::extensions::filters::network::dubbo_proxy::v3::Route& route)
+    const envoy::extensions::filters::network::Jres_proxy::v3::Route& route)
     : RouteEntryImplBase(route), method_name_(route.match().method().name()) {
   if (route.match().method().params_match_size() != 0) {
     parameter_route_ = std::make_shared<ParameterRouteEntryImpl>(route);
@@ -145,23 +145,23 @@ RouteConstSharedPtr MethodRouteEntryImpl::matches(const MessageMetadata& metadat
   ASSERT(invocation);
 
   if (invocation->hasHeaders() && !RouteEntryImplBase::headersMatch(invocation->headers())) {
-    ENVOY_LOG(error, "dubbo route matcher: headers not match");
+    ENVOY_LOG(error, "Jres route matcher: headers not match");
     return nullptr;
   }
 
   if (invocation->methodName().empty()) {
-    ENVOY_LOG(error, "dubbo route matcher: there is no method name in the metadata");
+    ENVOY_LOG(error, "Jres route matcher: there is no method name in the metadata");
     return nullptr;
   }
 
   if (!method_name_.match(invocation->methodName())) {
-    ENVOY_LOG(debug, "dubbo route matcher: method matching failed, input method '{}'",
+    ENVOY_LOG(debug, "Jres route matcher: method matching failed, input method '{}'",
               invocation->methodName());
     return nullptr;
   }
 
   if (parameter_route_) {
-    ENVOY_LOG(debug, "dubbo route matcher: parameter matching is required");
+    ENVOY_LOG(debug, "Jres route matcher: parameter matching is required");
     return parameter_route_->matches(metadata, random_value);
   }
 
@@ -171,12 +171,12 @@ RouteConstSharedPtr MethodRouteEntryImpl::matches(const MessageMetadata& metadat
 SingleRouteMatcherImpl::SingleRouteMatcherImpl(const RouteConfig& config,
                                                Server::Configuration::FactoryContext&)
     : service_name_(config.interface()), group_(config.group()), version_(config.version()) {
-  using envoy::extensions::filters::network::dubbo_proxy::v3::RouteMatch;
+  using envoy::extensions::filters::network::Jres_proxy::v3::RouteMatch;
 
   for (const auto& route : config.routes()) {
     routes_.emplace_back(std::make_shared<MethodRouteEntryImpl>(route));
   }
-  ENVOY_LOG(debug, "dubbo route matcher: routes list size {}", routes_.size());
+  ENVOY_LOG(debug, "Jres route matcher: routes list size {}", routes_.size());
 }
 
 RouteConstSharedPtr SingleRouteMatcherImpl::route(const MessageMetadata& metadata,
@@ -196,7 +196,7 @@ RouteConstSharedPtr SingleRouteMatcherImpl::route(const MessageMetadata& metadat
       }
     }
   } else {
-    ENVOY_LOG(debug, "dubbo route matcher: interface matching failed");
+    ENVOY_LOG(debug, "Jres route matcher: interface matching failed");
   }
 
   return nullptr;
@@ -229,12 +229,12 @@ public:
 };
 
 /**
- * Static registration for the Dubbo protocol. @see RegisterFactory.
+ * Static registration for the Jres protocol. @see RegisterFactory.
  */
 REGISTER_FACTORY(DefaultRouteMatcherConfigFactory, NamedRouteMatcherConfigFactory);
 
 } // namespace Router
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

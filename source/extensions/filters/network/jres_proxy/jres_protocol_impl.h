@@ -1,19 +1,19 @@
 #pragma once
 
-#include "extensions/filters/network/dubbo_proxy/protocol.h"
+#include "extensions/filters/network/jres_proxy/protocol.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
-class DubboProtocolImpl : public Protocol {
+class JresProtocolImpl : public Protocol {
 public:
-  DubboProtocolImpl() = default;
-  ~DubboProtocolImpl() override = default;
+  JresProtocolImpl() = default;
+  ~JresProtocolImpl() override = default;
 
   const std::string& name() const override { return ProtocolNames::get().fromType(type()); }
-  ProtocolType type() const override { return ProtocolType::Dubbo; }
+  ProtocolType type() const override { return ProtocolType::Jres; }
 
   std::pair<ContextSharedPtr, bool> decodeHeader(Buffer::Instance& buffer,
                                                  MessageMetadataSharedPtr metadata) override;
@@ -27,7 +27,7 @@ public:
   static constexpr int32_t MaxBodySize = 16 * 1024 * 1024;
 };
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

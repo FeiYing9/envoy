@@ -7,15 +7,15 @@
 
 #include "common/protobuf/utility.h"
 
-#include "extensions/filters/network/dubbo_proxy/filters/filter_config.h"
+#include "extensions/filters/network/jres_proxy/filters/filter_config.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
-namespace DubboFilters {
+namespace JresProxy {
+namespace JresFilters {
 
-template <class ConfigProto> class FactoryBase : public NamedDubboFilterConfigFactory {
+template <class ConfigProto> class FactoryBase : public NamedJresFilterConfigFactory {
 public:
   FilterFactoryCb
   createFilterFactoryFromProto(const Protobuf::Message& proto_config,
@@ -44,8 +44,8 @@ private:
   const std::string name_;
 };
 
-} // namespace DubboFilters
-} // namespace DubboProxy
+} // namespace JresFilters
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

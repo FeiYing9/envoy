@@ -9,24 +9,24 @@
 #include "common/common/macros.h"
 #include "common/protobuf/protobuf.h"
 
-#include "extensions/filters/network/dubbo_proxy/filters/filter.h"
+#include "extensions/filters/network/jres_proxy/filters/filter.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
-namespace DubboFilters {
+namespace JresProxy {
+namespace JresFilters {
 
 /**
- * Implemented by each Dubbo filter and registered via Registry::registerFactory or the
+ * Implemented by each Jres filter and registered via Registry::registerFactory or the
  * convenience class RegisterFactory.
  */
-class NamedDubboFilterConfigFactory : public Envoy::Config::TypedFactory {
+class NamedJresFilterConfigFactory : public Envoy::Config::TypedFactory {
 public:
-  ~NamedDubboFilterConfigFactory() override = default;
+  ~NamedJresFilterConfigFactory() override = default;
 
   /**
-   * Create a particular dubbo filter factory implementation. If the implementation is unable to
+   * Create a particular Jres filter factory implementation. If the implementation is unable to
    * produce a factory with the provided parameters, it should throw an EnvoyException in the case
    * of general error. The returned callback should always be initialized.
    * @param config supplies the configuration for the filter
@@ -34,15 +34,15 @@ public:
    * @param context supplies the filter's context.
    * @return FilterFactoryCb the factory creation function.
    */
-  virtual DubboFilters::FilterFactoryCb
+  virtual JresFilters::FilterFactoryCb
   createFilterFactoryFromProto(const Protobuf::Message& config, const std::string& stat_prefix,
                                Server::Configuration::FactoryContext& context) PURE;
 
-  std::string category() const override { return "envoy.dubbo_proxy.filters"; }
+  std::string category() const override { return "envoy.jres_proxy.filters"; }
 };
 
-} // namespace DubboFilters
-} // namespace DubboProxy
+} // namespace JresFilters
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

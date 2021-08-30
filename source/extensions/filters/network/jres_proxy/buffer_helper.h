@@ -8,7 +8,7 @@
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 /**
  * BufferHelper provides buffer operations for reading bytes and numbers in the various encodings
@@ -33,7 +33,7 @@ public:
   static float peekFloat(Buffer::Instance& buffer, uint64_t offset = 0);
 };
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

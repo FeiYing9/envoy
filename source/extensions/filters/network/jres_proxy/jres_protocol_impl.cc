@@ -1,16 +1,16 @@
-#include "extensions/filters/network/dubbo_proxy/dubbo_protocol_impl.h"
+#include "extensions/filters/network/jres_proxy/jres_protocol_impl.h"
 
 #include "envoy/registry/registry.h"
 
 #include "common/common/assert.h"
 
-#include "extensions/filters/network/dubbo_proxy/message_impl.h"
-#include "extensions/filters/network/dubbo_proxy/serializer_impl.h"
+#include "extensions/filters/network/jres_proxy/message_impl.h"
+#include "extensions/filters/network/jres_proxy/serializer_impl.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 namespace {
 
 constexpr uint16_t MagicNumber = 0xdabb;
@@ -56,13 +56,13 @@ bool isValidResponseStatus(ResponseStatus status) {
 }
 
 void parseRequestInfoFromBuffer(Buffer::Instance& data, MessageMetadataSharedPtr metadata) {
-  ASSERT(data.length() >= DubboProtocolImpl::MessageSize);
+  ASSERT(data.length() >= JresProtocolImpl::MessageSize);
   uint8_t flag = data.peekInt<uint8_t>(FlagOffset);
   bool is_two_way = (flag & TwoWayMask) == TwoWayMask ? true : false;
   SerializationType type = static_cast<SerializationType>(flag & SerializationTypeMask);
   if (!isValidSerializationType(type)) {
     throw EnvoyException(
-        absl::StrCat("invalid dubbo message serialization type ",
+        absl::StrCat("invalid jres message serialization type ",
                      static_cast<std::underlying_type<SerializationType>::type>(type)));
   }
 
@@ -74,11 +74,11 @@ void parseRequestInfoFromBuffer(Buffer::Instance& data, MessageMetadataSharedPtr
 }
 
 void parseResponseInfoFromBuffer(Buffer::Instance& buffer, MessageMetadataSharedPtr metadata) {
-  ASSERT(buffer.length() >= DubboProtocolImpl::MessageSize);
+  ASSERT(buffer.length() >= JresProtocolImpl::MessageSize);
   ResponseStatus status = static_cast<ResponseStatus>(buffer.peekInt<uint8_t>(StatusOffset));
   if (!isValidResponseStatus(status)) {
     throw EnvoyException(
-        absl::StrCat("invalid dubbo message response status ",
+        absl::StrCat("invalid jres message response status ",
                      static_cast<std::underlying_type<ResponseStatus>::type>(status)));
   }
 
@@ -86,18 +86,18 @@ void parseResponseInfoFromBuffer(Buffer::Instance& buffer, MessageMetadataShared
 }
 
 std::pair<ContextSharedPtr, bool>
-DubboProtocolImpl::decodeHeader(Buffer::Instance& buffer, MessageMetadataSharedPtr metadata) {
+JresProtocolImpl::decodeHeader(Buffer::Instance& buffer, MessageMetadataSharedPtr metadata) {
   if (!metadata) {
     throw EnvoyException("invalid metadata parameter");
   }
 
-  if (buffer.length() < DubboProtocolImpl::MessageSize) {
+  if (buffer.length() < JresProtocolImpl::MessageSize) {
     return std::pair<ContextSharedPtr, bool>(nullptr, false);
   }
 
   uint16_t magic_number = buffer.peekBEInt<uint16_t>();
   if (magic_number != MagicNumber) {
-    throw EnvoyException(absl::StrCat("invalid dubbo message magic number ", magic_number));
+    throw EnvoyException(absl::StrCat("invalid jres message magic number ", magic_number));
   }
 
   uint8_t flag = buffer.peekInt<uint8_t>(FlagOffset);
@@ -109,7 +109,7 @@ DubboProtocolImpl::decodeHeader(Buffer::Instance& buffer, MessageMetadataSharedP
 
   // The body size of the heartbeat message is zero.
   if (body_size > MaxBodySize || body_size < 0) {
-    throw EnvoyException(absl::StrCat("invalid dubbo message size ", body_size));
+    throw EnvoyException(absl::StrCat("invalid jres message size ", body_size));
   }
 
   metadata->setRequestId(request_id);
@@ -129,14 +129,14 @@ DubboProtocolImpl::decodeHeader(Buffer::Instance& buffer, MessageMetadataSharedP
   }
 
   auto context = std::make_shared<ContextImpl>();
-  context->setHeaderSize(DubboProtocolImpl::MessageSize);
+  context->setHeaderSize(JresProtocolImpl::MessageSize);
   context->setBodySize(body_size);
   context->setHeartbeat(is_event);
 
   return std::pair<ContextSharedPtr, bool>(context, true);
 }
 
-bool DubboProtocolImpl::decodeData(Buffer::Instance& buffer, ContextSharedPtr context,
+bool JresProtocolImpl::decodeData(Buffer::Instance& buffer, ContextSharedPtr context,
                                    MessageMetadataSharedPtr metadata) {
   ASSERT(serializer_);
 
@@ -171,7 +171,7 @@ bool DubboProtocolImpl::decodeData(Buffer::Instance& buffer, ContextSharedPtr co
   return true;
 }
 
-bool DubboProtocolImpl::encode(Buffer::Instance& buffer, const MessageMetadata& metadata,
+bool JresProtocolImpl::encode(Buffer::Instance& buffer, const MessageMetadata& metadata,
                                const std::string& content, RpcResponseType type) {
   ASSERT(serializer_);
 
@@ -212,17 +212,17 @@ bool DubboProtocolImpl::encode(Buffer::Instance& buffer, const MessageMetadata& 
   }
 }
 
-class DubboProtocolConfigFactory : public ProtocolFactoryBase<DubboProtocolImpl> {
+class JresProtocolConfigFactory : public ProtocolFactoryBase<JresProtocolImpl> {
 public:
-  DubboProtocolConfigFactory() : ProtocolFactoryBase(ProtocolType::Dubbo) {}
+  JresProtocolConfigFactory() : ProtocolFactoryBase(ProtocolType::Jres) {}
 };
 
 /**
- * Static registration for the Dubbo protocol. @see RegisterFactory.
+ * Static registration for the Jres protocol. @see RegisterFactory.
  */
-REGISTER_FACTORY(DubboProtocolConfigFactory, NamedProtocolConfigFactory);
+REGISTER_FACTORY(JresProtocolConfigFactory, NamedProtocolConfigFactory);
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

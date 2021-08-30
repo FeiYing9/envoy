@@ -8,18 +8,18 @@
 #include "envoy/network/connection.h"
 #include "envoy/stream_info/stream_info.h"
 
-#include "extensions/filters/network/dubbo_proxy/decoder_event_handler.h"
-#include "extensions/filters/network/dubbo_proxy/message.h"
-#include "extensions/filters/network/dubbo_proxy/metadata.h"
-#include "extensions/filters/network/dubbo_proxy/protocol.h"
-#include "extensions/filters/network/dubbo_proxy/router/router.h"
-#include "extensions/filters/network/dubbo_proxy/serializer.h"
+#include "extensions/filters/network/jres_proxy/decoder_event_handler.h"
+#include "extensions/filters/network/jres_proxy/message.h"
+#include "extensions/filters/network/jres_proxy/metadata.h"
+#include "extensions/filters/network/jres_proxy/protocol.h"
+#include "extensions/filters/network/jres_proxy/router/router.h"
+#include "extensions/filters/network/jres_proxy/serializer.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
-namespace DubboFilters {
+namespace JresProxy {
+namespace JresFilters {
 
 enum class UpstreamResponseStatus : uint8_t {
   MoreData = 0, // The upstream response requires more data.
@@ -82,7 +82,7 @@ public:
   /**
    * @return RouteConstSharedPtr the route for the current request.
    */
-  virtual DubboProxy::Router::RouteConstSharedPtr route() PURE;
+  virtual JresProxy::Router::RouteConstSharedPtr route() PURE;
 
   /**
    * @return SerializationType the originating protocol.
@@ -256,7 +256,7 @@ public:
 };
 
 /**
- * This function is used to wrap the creation of a Dubbo filter chain for new connections as they
+ * This function is used to wrap the creation of a Jres filter chain for new connections as they
  * come in. Filter factories create the function at configuration initialization time, and then
  * they are used at runtime.
  * @param callbacks supplies the callbacks for the stream to install filters to. Typically the
@@ -266,25 +266,25 @@ public:
 using FilterFactoryCb = std::function<void(FilterChainFactoryCallbacks& callbacks)>;
 
 /**
- * A FilterChainFactory is used by a connection manager to create a Dubbo level filter chain when
+ * A FilterChainFactory is used by a connection manager to create a Jres level filter chain when
  * a new connection is created. Typically it would be implemented by a configuration engine that
  * would install a set of filters that are able to process an application scenario on top of a
- * stream of Dubbo requests.
+ * stream of Jres requests.
  */
 class FilterChainFactory {
 public:
   virtual ~FilterChainFactory() = default;
 
   /**
-   * Called when a new Dubbo stream is created on the connection.
+   * Called when a new Jres stream is created on the connection.
    * @param callbacks supplies the "sink" that is used for actually creating the filter chain. @see
    *                  FilterChainFactoryCallbacks.
    */
   virtual void createFilterChain(FilterChainFactoryCallbacks& callbacks) PURE;
 };
 
-} // namespace DubboFilters
-} // namespace DubboProxy
+} // namespace JresFilters
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

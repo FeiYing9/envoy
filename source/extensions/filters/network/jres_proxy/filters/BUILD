@@ -15,11 +15,11 @@ envoy_cc_library(
         "//include/envoy/buffer:buffer_interface",
         "//include/envoy/network:connection_interface",
         "//include/envoy/stream_info:stream_info_interface",
-        "//source/extensions/filters/network/dubbo_proxy:decoder_events_lib",
-        "//source/extensions/filters/network/dubbo_proxy:metadata_lib",
-        "//source/extensions/filters/network/dubbo_proxy:protocol_interface",
-        "//source/extensions/filters/network/dubbo_proxy:serializer_interface",
-        "//source/extensions/filters/network/dubbo_proxy/router:router_interface",
+        "//source/extensions/filters/network/jres_proxy:decoder_events_lib",
+        "//source/extensions/filters/network/jres_proxy:metadata_lib",
+        "//source/extensions/filters/network/jres_proxy:protocol_interface",
+        "//source/extensions/filters/network/jres_proxy:serializer_interface",
+        "//source/extensions/filters/network/jres_proxy/router:router_interface",
     ],
 )
 

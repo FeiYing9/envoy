@@ -9,14 +9,14 @@
 #include "common/config/utility.h"
 #include "common/singleton/const_singleton.h"
 
-#include "extensions/filters/network/dubbo_proxy/message.h"
-#include "extensions/filters/network/dubbo_proxy/metadata.h"
-#include "extensions/filters/network/dubbo_proxy/protocol_constants.h"
+#include "extensions/filters/network/jres_proxy/message.h"
+#include "extensions/filters/network/jres_proxy/metadata.h"
+#include "extensions/filters/network/jres_proxy/protocol_constants.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 class Serializer {
 public:
@@ -38,7 +38,7 @@ public:
    * deserialize an rpc call
    * If successful, the RpcInvocation removed from the buffer
    *
-   * @param buffer the currently buffered dubbo data
+   * @param buffer the currently buffered jres data
    * @param context context information for RPC messages
    * @return a pair containing the deserialized result of the message and the deserialized
    *         invocation information.
@@ -50,7 +50,7 @@ public:
   /**
    * deserialize result of an rpc call
    *
-   * @param buffer the currently buffered dubbo data
+   * @param buffer the currently buffered jres data
    * @param context context information for RPC messages
    * @return a pair containing the deserialized result of the message and the deserialized
    *         result information.
@@ -75,7 +75,7 @@ public:
 using SerializerPtr = std::unique_ptr<Serializer>;
 
 /**
- * Implemented by each Dubbo serialize and registered via Registry::registerFactory or the
+ * Implemented by each Jres serialize and registered via Registry::registerFactory or the
  * convenience class RegisterFactory.
  */
 class NamedSerializerConfigFactory : public Config::UntypedFactory {
@@ -83,12 +83,12 @@ public:
   ~NamedSerializerConfigFactory() override = default;
 
   /**
-   * Create a particular Dubbo serializer.
+   * Create a particular Jres serializer.
    * @return SerializerPtr the transport
    */
   virtual SerializerPtr createSerializer() PURE;
 
-  std::string category() const override { return "envoy.dubbo_proxy.serializers"; }
+  std::string category() const override { return "envoy.jres_proxy.serializers"; }
 
   /**
    * Convenience method to lookup a factory by type.
@@ -119,7 +119,7 @@ private:
   const std::string name_;
 };
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

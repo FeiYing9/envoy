@@ -5,12 +5,12 @@
 
 #include "envoy/router/router.h"
 
-#include "extensions/filters/network/dubbo_proxy/metadata.h"
+#include "extensions/filters/network/jres_proxy/metadata.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 namespace Router {
 
 /**
@@ -58,7 +58,7 @@ public:
   virtual ~Config() = default;
 
   /**
-   * Based on the incoming Dubbo request transport and/or protocol data, determine the target
+   * Based on the incoming Jres request transport and/or protocol data, determine the target
    * route for the request.
    * @param metadata MessageMetadata for the message to route
    * @param random_value uint64_t used to select cluster affinity
@@ -71,7 +71,7 @@ public:
 using ConfigConstSharedPtr = std::shared_ptr<const Config>;
 
 } // namespace Router
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

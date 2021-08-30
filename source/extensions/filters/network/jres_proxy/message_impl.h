@@ -1,11 +1,11 @@
 #pragma once
 
-#include "extensions/filters/network/dubbo_proxy/message.h"
+#include "extensions/filters/network/jres_proxy/message.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 class ContextBase : public Context {
 public:
@@ -59,7 +59,7 @@ protected:
   absl::optional<std::string> group_;
 };
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

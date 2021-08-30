@@ -1,7 +1,7 @@
 #pragma once
 
 #include "envoy/common/time.h"
-#include "envoy/extensions/filters/network/dubbo_proxy/v3/dubbo_proxy.pb.h"
+#include "envoy/extensions/filters/network/jres_proxy/v3/jres_proxy.pb.h"
 #include "envoy/network/connection.h"
 #include "envoy/network/filter.h"
 #include "envoy/stats/scope.h"
@@ -11,18 +11,18 @@
 
 #include "common/common/logger.h"
 
-#include "extensions/filters/network/dubbo_proxy/active_message.h"
-#include "extensions/filters/network/dubbo_proxy/decoder.h"
-#include "extensions/filters/network/dubbo_proxy/decoder_event_handler.h"
-#include "extensions/filters/network/dubbo_proxy/filters/filter.h"
-#include "extensions/filters/network/dubbo_proxy/protocol.h"
-#include "extensions/filters/network/dubbo_proxy/serializer.h"
-#include "extensions/filters/network/dubbo_proxy/stats.h"
+#include "extensions/filters/network/jres_proxy/active_message.h"
+#include "extensions/filters/network/jres_proxy/decoder.h"
+#include "extensions/filters/network/jres_proxy/decoder_event_handler.h"
+#include "extensions/filters/network/jres_proxy/filters/filter.h"
+#include "extensions/filters/network/jres_proxy/protocol.h"
+#include "extensions/filters/network/jres_proxy/serializer.h"
+#include "extensions/filters/network/jres_proxy/stats.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 /**
  * Config is a configuration interface for ConnectionManager.
@@ -31,8 +31,8 @@ class Config {
 public:
   virtual ~Config() = default;
 
-  virtual DubboFilters::FilterChainFactory& filterFactory() PURE;
-  virtual DubboFilterStats& stats() PURE;
+  virtual JresFilters::FilterChainFactory& filterFactory() PURE;
+  virtual JresFilterStats& stats() PURE;
   virtual ProtocolPtr createProtocol() PURE;
   virtual Router::Config& routerConfig() PURE;
 };
@@ -41,11 +41,11 @@ public:
 class ConnectionManager : public Network::ReadFilter,
                           public Network::ConnectionCallbacks,
                           public RequestDecoderCallbacks,
-                          Logger::Loggable<Logger::Id::dubbo> {
+                          Logger::Loggable<Logger::Id::jres> {
 public:
-  using ConfigProtocolType = envoy::extensions::filters::network::dubbo_proxy::v3::ProtocolType;
+  using ConfigProtocolType = envoy::extensions::filters::network::jres_proxy::v3::ProtocolType;
   using ConfigSerializationType =
-      envoy::extensions::filters::network::dubbo_proxy::v3::SerializationType;
+      envoy::extensions::filters::network::jres_proxy::v3::SerializationType;
 
   ConnectionManager(Config& config, Random::RandomGenerator& random_generator,
                     TimeSource& time_system);
@@ -65,7 +65,7 @@ public:
   StreamHandler& newStream() override;
   void onHeartbeat(MessageMetadataSharedPtr metadata) override;
 
-  DubboFilterStats& stats() const { return stats_; }
+  JresFilterStats& stats() const { return stats_; }
   Network::Connection& connection() const { return read_callbacks_->connection(); }
   TimeSource& timeSystem() const { return time_system_; }
   Random::RandomGenerator& randomGenerator() const { return random_generator_; }
@@ -75,7 +75,7 @@ public:
 
   void continueDecoding();
   void deferredMessage(ActiveMessage& message);
-  void sendLocalReply(MessageMetadata& metadata, const DubboFilters::DirectResponse& response,
+  void sendLocalReply(MessageMetadata& metadata, const JresFilters::DirectResponse& response,
                       bool end_stream);
 
   // This function is for testing only.
@@ -93,7 +93,7 @@ private:
 
   Config& config_;
   TimeSource& time_system_;
-  DubboFilterStats& stats_;
+  JresFilterStats& stats_;
   Random::RandomGenerator& random_generator_;
 
   SerializerPtr serializer_;
@@ -102,7 +102,7 @@ private:
   Network::ReadFilterCallbacks* read_callbacks_{};
 };
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

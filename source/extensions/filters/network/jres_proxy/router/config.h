@@ -1,31 +1,31 @@
 #pragma once
 
-#include "envoy/extensions/filters/network/dubbo_proxy/router/v3/router.pb.h"
-#include "envoy/extensions/filters/network/dubbo_proxy/router/v3/router.pb.validate.h"
+#include "envoy/extensions/filters/network/jres_proxy/router/v3/router.pb.h"
+#include "envoy/extensions/filters/network/jres_proxy/router/v3/router.pb.validate.h"
 
-#include "extensions/filters/network/dubbo_proxy/filters/factory_base.h"
-#include "extensions/filters/network/dubbo_proxy/filters/well_known_names.h"
+#include "extensions/filters/network/jres_proxy/filters/factory_base.h"
+#include "extensions/filters/network/jres_proxy/filters/well_known_names.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 namespace Router {
 
 class RouterFilterConfig
-    : public DubboFilters::FactoryBase<
-          envoy::extensions::filters::network::dubbo_proxy::router::v3::Router> {
+    : public JresFilters::FactoryBase<
+          envoy::extensions::filters::network::jres_proxy::router::v3::Router> {
 public:
-  RouterFilterConfig() : FactoryBase(DubboFilters::DubboFilterNames::get().ROUTER) {}
+  RouterFilterConfig() : FactoryBase(JresFilters::JresFilterNames::get().ROUTER) {}
 
 private:
-  DubboFilters::FilterFactoryCb createFilterFactoryFromProtoTyped(
-      const envoy::extensions::filters::network::dubbo_proxy::router::v3::Router& proto_config,
+  JresFilters::FilterFactoryCb createFilterFactoryFromProtoTyped(
+      const envoy::extensions::filters::network::jres_proxy::router::v3::Router& proto_config,
       const std::string& stat_prefix, Server::Configuration::FactoryContext& context) override;
 };
 
 } // namespace Router
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

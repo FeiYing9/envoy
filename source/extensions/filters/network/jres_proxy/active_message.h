@@ -10,32 +10,32 @@
 #include "common/common/logger.h"
 #include "common/stream_info/stream_info_impl.h"
 
-#include "extensions/filters/network/dubbo_proxy/decoder.h"
-#include "extensions/filters/network/dubbo_proxy/decoder_event_handler.h"
-#include "extensions/filters/network/dubbo_proxy/filters/filter.h"
-#include "extensions/filters/network/dubbo_proxy/metadata.h"
-#include "extensions/filters/network/dubbo_proxy/router/router.h"
-#include "extensions/filters/network/dubbo_proxy/stats.h"
+#include "extensions/filters/network/jres_proxy/decoder.h"
+#include "extensions/filters/network/jres_proxy/decoder_event_handler.h"
+#include "extensions/filters/network/jres_proxy/filters/filter.h"
+#include "extensions/filters/network/jres_proxy/metadata.h"
+#include "extensions/filters/network/jres_proxy/router/router.h"
+#include "extensions/filters/network/jres_proxy/stats.h"
 
 #include "absl/types/optional.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 class ConnectionManager;
 class ActiveMessage;
 
 class ActiveResponseDecoder : public ResponseDecoderCallbacks,
                               public StreamHandler,
-                              Logger::Loggable<Logger::Id::dubbo> {
+                              Logger::Loggable<Logger::Id::jres> {
 public:
-  ActiveResponseDecoder(ActiveMessage& parent, DubboFilterStats& stats,
+  ActiveResponseDecoder(ActiveMessage& parent, JresFilterStats& stats,
                         Network::Connection& connection, ProtocolPtr&& protocol);
   ~ActiveResponseDecoder() override = default;
 
-  DubboFilters::UpstreamResponseStatus onData(Buffer::Instance& data);
+  JresFilters::UpstreamResponseStatus onData(Buffer::Instance& data);
 
   // StreamHandler
   void onStreamDecoded(MessageMetadataSharedPtr metadata, ContextSharedPtr ctx) override;
@@ -50,28 +50,28 @@ private:
   FilterStatus applyMessageEncodedFilters(MessageMetadataSharedPtr metadata, ContextSharedPtr ctx);
 
   ActiveMessage& parent_;
-  DubboFilterStats& stats_;
+  JresFilterStats& stats_;
   Network::Connection& response_connection_;
   ProtocolPtr protocol_;
   ResponseDecoderPtr decoder_;
   MessageMetadataSharedPtr metadata_;
   bool complete_ : 1;
-  DubboFilters::UpstreamResponseStatus response_status_;
+  JresFilters::UpstreamResponseStatus response_status_;
 };
 
 using ActiveResponseDecoderPtr = std::unique_ptr<ActiveResponseDecoder>;
 
-class ActiveMessageFilterBase : public virtual DubboFilters::FilterCallbacksBase {
+class ActiveMessageFilterBase : public virtual JresFilters::FilterCallbacksBase {
 public:
   ActiveMessageFilterBase(ActiveMessage& parent, bool dual_filter)
       : parent_(parent), dual_filter_(dual_filter) {}
   ~ActiveMessageFilterBase() override = default;
 
-  // DubboFilters::FilterCallbacksBase
+  // JresFilters::FilterCallbacksBase
   uint64_t requestId() const override;
   uint64_t streamId() const override;
   const Network::Connection* connection() const override;
-  DubboProxy::Router::RouteConstSharedPtr route() override;
+  JresProxy::Router::RouteConstSharedPtr route() override;
   SerializationType serializationType() const override;
   ProtocolType protocolType() const override;
   StreamInfo::StreamInfo& streamInfo() override;
@@ -85,25 +85,25 @@ protected:
 
 // Wraps a DecoderFilter and acts as the DecoderFilterCallbacks for the filter, enabling filter
 // chain continuation.
-class ActiveMessageDecoderFilter : public DubboFilters::DecoderFilterCallbacks,
+class ActiveMessageDecoderFilter : public JresFilters::DecoderFilterCallbacks,
                                    public ActiveMessageFilterBase,
                                    public LinkedObject<ActiveMessageDecoderFilter>,
-                                   Logger::Loggable<Logger::Id::dubbo> {
+                                   Logger::Loggable<Logger::Id::jres> {
 public:
-  ActiveMessageDecoderFilter(ActiveMessage& parent, DubboFilters::DecoderFilterSharedPtr filter,
+  ActiveMessageDecoderFilter(ActiveMessage& parent, JresFilters::DecoderFilterSharedPtr filter,
                              bool dual_filter);
   ~ActiveMessageDecoderFilter() override = default;
 
   void continueDecoding() override;
-  void sendLocalReply(const DubboFilters::DirectResponse& response, bool end_stream) override;
+  void sendLocalReply(const JresFilters::DirectResponse& response, bool end_stream) override;
   void startUpstreamResponse() override;
-  DubboFilters::UpstreamResponseStatus upstreamData(Buffer::Instance& buffer) override;
+  JresFilters::UpstreamResponseStatus upstreamData(Buffer::Instance& buffer) override;
   void resetDownstreamConnection() override;
 
-  DubboFilters::DecoderFilterSharedPtr handler() { return handle_; }
+  JresFilters::DecoderFilterSharedPtr handler() { return handle_; }
 
 private:
-  DubboFilters::DecoderFilterSharedPtr handle_;
+  JresFilters::DecoderFilterSharedPtr handle_;
 };
 
 using ActiveMessageDecoderFilterPtr = std::unique_ptr<ActiveMessageDecoderFilter>;
@@ -111,19 +111,19 @@ using ActiveMessageDecoderFilterPtr = std::unique_ptr<ActiveMessageDecoderFilter
 // Wraps a EncoderFilter and acts as the EncoderFilterCallbacks for the filter, enabling filter
 // chain continuation.
 class ActiveMessageEncoderFilter : public ActiveMessageFilterBase,
-                                   public DubboFilters::EncoderFilterCallbacks,
+                                   public JresFilters::EncoderFilterCallbacks,
                                    public LinkedObject<ActiveMessageEncoderFilter>,
-                                   Logger::Loggable<Logger::Id::dubbo> {
+                                   Logger::Loggable<Logger::Id::jres> {
 public:
-  ActiveMessageEncoderFilter(ActiveMessage& parent, DubboFilters::EncoderFilterSharedPtr filter,
+  ActiveMessageEncoderFilter(ActiveMessage& parent, JresFilters::EncoderFilterSharedPtr filter,
                              bool dual_filter);
   ~ActiveMessageEncoderFilter() override = default;
 
   void continueEncoding() override;
-  DubboFilters::EncoderFilterSharedPtr handler() { return handle_; }
+  JresFilters::EncoderFilterSharedPtr handler() { return handle_; }
 
 private:
-  DubboFilters::EncoderFilterSharedPtr handle_;
+  JresFilters::EncoderFilterSharedPtr handle_;
 
   friend class ActiveMessage;
 };
@@ -134,9 +134,9 @@ using ActiveMessageEncoderFilterPtr = std::unique_ptr<ActiveMessageEncoderFilter
 class ActiveMessage : public LinkedObject<ActiveMessage>,
                       public Event::DeferredDeletable,
                       public StreamHandler,
-                      public DubboFilters::DecoderFilterCallbacks,
-                      public DubboFilters::FilterChainFactoryCallbacks,
-                      Logger::Loggable<Logger::Id::dubbo> {
+                      public JresFilters::DecoderFilterCallbacks,
+                      public JresFilters::FilterChainFactoryCallbacks,
+                      Logger::Loggable<Logger::Id::jres> {
 public:
   ActiveMessage(ConnectionManager& parent);
   ~ActiveMessage() override;
@@ -151,15 +151,15 @@ public:
   std::list<ActiveMessageDecoderFilterPtr>::iterator
   commonDecodePrefix(ActiveMessageDecoderFilter* filter, FilterIterationStartState state);
 
-  // Dubbo::FilterChainFactoryCallbacks
-  void addDecoderFilter(DubboFilters::DecoderFilterSharedPtr filter) override;
-  void addEncoderFilter(DubboFilters::EncoderFilterSharedPtr filter) override;
-  void addFilter(DubboFilters::CodecFilterSharedPtr filter) override;
+  // Jres::FilterChainFactoryCallbacks
+  void addDecoderFilter(JresFilters::DecoderFilterSharedPtr filter) override;
+  void addEncoderFilter(JresFilters::EncoderFilterSharedPtr filter) override;
+  void addFilter(JresFilters::CodecFilterSharedPtr filter) override;
 
   // StreamHandler
   void onStreamDecoded(MessageMetadataSharedPtr metadata, ContextSharedPtr ctx) override;
 
-  // DubboFilters::DecoderFilterCallbacks
+  // JresFilters::DecoderFilterCallbacks
   uint64_t requestId() const override;
   uint64_t streamId() const override;
   const Network::Connection* connection() const override;
@@ -168,9 +168,9 @@ public:
   ProtocolType protocolType() const override;
   StreamInfo::StreamInfo& streamInfo() override;
   Router::RouteConstSharedPtr route() override;
-  void sendLocalReply(const DubboFilters::DirectResponse& response, bool end_stream) override;
+  void sendLocalReply(const JresFilters::DirectResponse& response, bool end_stream) override;
   void startUpstreamResponse() override;
-  DubboFilters::UpstreamResponseStatus upstreamData(Buffer::Instance& buffer) override;
+  JresFilters::UpstreamResponseStatus upstreamData(Buffer::Instance& buffer) override;
   void resetDownstreamConnection() override;
   Event::Dispatcher& dispatcher() override;
   void resetStream() override;
@@ -188,8 +188,8 @@ public:
   bool pendingStreamDecoded() const { return pending_stream_decoded_; }
 
 private:
-  void addDecoderFilterWorker(DubboFilters::DecoderFilterSharedPtr filter, bool dual_filter);
-  void addEncoderFilterWorker(DubboFilters::EncoderFilterSharedPtr, bool dual_filter);
+  void addDecoderFilterWorker(JresFilters::DecoderFilterSharedPtr filter, bool dual_filter);
+  void addEncoderFilterWorker(JresFilters::EncoderFilterSharedPtr, bool dual_filter);
 
   ConnectionManager& parent_;
 
@@ -201,10 +201,10 @@ private:
   absl::optional<Router::RouteConstSharedPtr> cached_route_;
 
   std::list<ActiveMessageDecoderFilterPtr> decoder_filters_;
-  std::function<FilterStatus(DubboFilters::DecoderFilter*)> filter_action_;
+  std::function<FilterStatus(JresFilters::DecoderFilter*)> filter_action_;
 
   std::list<ActiveMessageEncoderFilterPtr> encoder_filters_;
-  std::function<FilterStatus(DubboFilters::EncoderFilter*)> encoder_filter_action_;
+  std::function<FilterStatus(JresFilters::EncoderFilter*)> encoder_filter_action_;
 
   int32_t request_id_;
 
@@ -222,7 +222,7 @@ private:
 
 using ActiveMessagePtr = std::unique_ptr<ActiveMessage>;
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

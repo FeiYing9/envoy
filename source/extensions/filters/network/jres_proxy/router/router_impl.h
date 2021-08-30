@@ -9,26 +9,26 @@
 #include "common/common/logger.h"
 #include "common/upstream/load_balancer_impl.h"
 
-#include "extensions/filters/network/dubbo_proxy/filters/filter.h"
-#include "extensions/filters/network/dubbo_proxy/router/router.h"
+#include "extensions/filters/network/jres_proxy/filters/filter.h"
+#include "extensions/filters/network/jres_proxy/router/router.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 namespace Router {
 
 class Router : public Tcp::ConnectionPool::UpstreamCallbacks,
                public Upstream::LoadBalancerContextBase,
-               public DubboFilters::DecoderFilter,
-               Logger::Loggable<Logger::Id::dubbo> {
+               public JresFilters::DecoderFilter,
+               Logger::Loggable<Logger::Id::jres> {
 public:
   Router(Upstream::ClusterManager& cluster_manager) : cluster_manager_(cluster_manager) {}
   ~Router() override = default;
 
-  // DubboFilters::DecoderFilter
+  // JresFilters::DecoderFilter
   void onDestroy() override;
-  void setDecoderFilterCallbacks(DubboFilters::DecoderFilterCallbacks& callbacks) override;
+  void setDecoderFilterCallbacks(JresFilters::DecoderFilterCallbacks& callbacks) override;
 
   FilterStatus onMessageDecoded(MessageMetadataSharedPtr metadata, ContextSharedPtr ctx) override;
 
@@ -85,7 +85,7 @@ private:
 
   Upstream::ClusterManager& cluster_manager_;
 
-  DubboFilters::DecoderFilterCallbacks* callbacks_{};
+  JresFilters::DecoderFilterCallbacks* callbacks_{};
   RouteConstSharedPtr route_{};
   const RouteEntry* route_entry_{};
   Upstream::ClusterInfoConstSharedPtr cluster_;
@@ -97,7 +97,7 @@ private:
 };
 
 } // namespace Router
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

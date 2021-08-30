@@ -9,7 +9,7 @@
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 
 /*
  * Hessian deserialization
@@ -40,7 +40,7 @@ public:
   static size_t writeInt(Buffer::Instance& buffer, uint8_t value);
 };
 
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

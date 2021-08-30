@@ -4,24 +4,24 @@
 #include <string>
 
 #include "envoy/config/typed_config.h"
-#include "envoy/extensions/filters/network/dubbo_proxy/v3/route.pb.h"
+#include "envoy/extensions/filters/network/jres_proxy/v3/route.pb.h"
 #include "envoy/router/router.h"
 #include "envoy/server/filter_config.h"
 
 #include "common/config/utility.h"
 #include "common/singleton/const_singleton.h"
 
-#include "extensions/filters/network/dubbo_proxy/metadata.h"
-#include "extensions/filters/network/dubbo_proxy/router/router.h"
+#include "extensions/filters/network/jres_proxy/metadata.h"
+#include "extensions/filters/network/jres_proxy/router/router.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 namespace Router {
 
 using RouteConfigurations = Protobuf::RepeatedPtrField<
-    envoy::extensions::filters::network::dubbo_proxy::v3::RouteConfiguration>;
+    envoy::extensions::filters::network::jres_proxy::v3::RouteConfiguration>;
 
 enum class RouteMatcherType : uint8_t {
   Default,
@@ -64,7 +64,7 @@ using RouteMatcherPtr = std::unique_ptr<RouteMatcher>;
 using RouteMatcherConstSharedPtr = std::shared_ptr<const RouteMatcher>;
 
 /**
- * Implemented by each Dubbo protocol and registered via Registry::registerFactory or the
+ * Implemented by each Jres protocol and registered via Registry::registerFactory or the
  * convenience class RegisterFactory.
  */
 class NamedRouteMatcherConfigFactory : public Envoy::Config::UntypedFactory {
@@ -72,14 +72,14 @@ public:
   ~NamedRouteMatcherConfigFactory() override = default;
 
   /**
-   * Create a particular Dubbo protocol.
+   * Create a particular Jres protocol.
    * @param serialization_type the serialization type of the protocol body.
    * @return protocol instance pointer.
    */
   virtual RouteMatcherPtr createRouteMatcher(const RouteConfigurations& route_configs,
                                              Server::Configuration::FactoryContext& context) PURE;
 
-  std::string category() const override { return "envoy.dubbo_proxy.route_matchers"; }
+  std::string category() const override { return "envoy.jres_proxy.route_matchers"; }
 
   /**
    * Convenience method to lookup a factory by type.
@@ -113,7 +113,7 @@ private:
 };
 
 } // namespace Router
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy

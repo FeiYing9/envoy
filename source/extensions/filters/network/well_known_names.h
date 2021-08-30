@@ -22,6 +22,8 @@ public:
   const std::string RocketmqProxy = "envoy.filters.network.rocketmq_proxy";
   // Dubbo proxy filter
   const std::string DubboProxy = "envoy.filters.network.dubbo_proxy";
+  // Jres proxy filter
+  const std::string JresProxy = "envoy.filters.network.jres_proxy";
   // HTTP connection manager filter
   const std::string HttpConnectionManager = "envoy.filters.network.http_connection_manager";
   // Local rate limit filter

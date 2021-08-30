@@ -1,21 +1,21 @@
-#include "extensions/filters/network/dubbo_proxy/router/config.h"
+#include "extensions/filters/network/jres_proxy/router/config.h"
 
-#include "envoy/extensions/filters/network/dubbo_proxy/router/v3/router.pb.h"
-#include "envoy/extensions/filters/network/dubbo_proxy/router/v3/router.pb.validate.h"
+#include "envoy/extensions/filters/network/jres_proxy/router/v3/router.pb.h"
+#include "envoy/extensions/filters/network/jres_proxy/router/v3/router.pb.validate.h"
 #include "envoy/registry/registry.h"
 
-#include "extensions/filters/network/dubbo_proxy/router/router_impl.h"
+#include "extensions/filters/network/jres_proxy/router/router_impl.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace NetworkFilters {
-namespace DubboProxy {
+namespace JresProxy {
 namespace Router {
 
-DubboFilters::FilterFactoryCb RouterFilterConfig::createFilterFactoryFromProtoTyped(
-    const envoy::extensions::filters::network::dubbo_proxy::router::v3::Router&, const std::string&,
+JresFilters::FilterFactoryCb RouterFilterConfig::createFilterFactoryFromProtoTyped(
+    const envoy::extensions::filters::network::jres_proxy::router::v3::Router&, const std::string&,
     Server::Configuration::FactoryContext& context) {
-  return [&context](DubboFilters::FilterChainFactoryCallbacks& callbacks) -> void {
+  return [&context](JresFilters::FilterChainFactoryCallbacks& callbacks) -> void {
     callbacks.addDecoderFilter(std::make_shared<Router>(context.clusterManager()));
   };
 }
@@ -23,10 +23,10 @@ DubboFilters::FilterFactoryCb RouterFilterConfig::createFilterFactoryFromProtoTy
 /**
  * Static registration for the router filter. @see RegisterFactory.
  */
-REGISTER_FACTORY(RouterFilterConfig, DubboFilters::NamedDubboFilterConfigFactory);
+REGISTER_FACTORY(RouterFilterConfig, JresFilters::NamedJresFilterConfigFactory);
 
 } // namespace Router
-} // namespace DubboProxy
+} // namespace JresProxy
 } // namespace NetworkFilters
 } // namespace Extensions
 } // namespace Envoy
