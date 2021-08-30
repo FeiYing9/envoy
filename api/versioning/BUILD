@@ -97,6 +97,8 @@ proto_library(
         "//envoy/extensions/filters/network/direct_response/v3:pkg",
         "//envoy/extensions/filters/network/dubbo_proxy/router/v3:pkg",
         "//envoy/extensions/filters/network/dubbo_proxy/v3:pkg",
+        "//envoy/extensions/filters/network/jres_proxy/router/v3:pkg",
+        "//envoy/extensions/filters/network/jres_proxy/v3:pkg",
         "//envoy/extensions/filters/network/echo/v3:pkg",
         "//envoy/extensions/filters/network/ext_authz/v3:pkg",
         "//envoy/extensions/filters/network/http_connection_manager/v3:pkg",
