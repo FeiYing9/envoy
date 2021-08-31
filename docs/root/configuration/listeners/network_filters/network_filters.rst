@@ -11,6 +11,7 @@ filters.
   :maxdepth: 2
 
   dubbo_proxy_filter
+  jres_proxy_filter
   client_ssl_auth_filter
   echo_filter
   direct_response_filter

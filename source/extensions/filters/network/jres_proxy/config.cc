@@ -30,7 +30,7 @@ Network::FilterFactoryCb JresProxyFilterConfigFactory::createFilterFactoryFromPr
 }
 
 /**
- * Static registration for the Jres filter. @see RegisterFactory.
+ * Static registration for the jres filter. @see RegisterFactory.
  */
 REGISTER_FACTORY(JresProxyFilterConfigFactory,
                  Server::Configuration::NamedNetworkFilterConfigFactory);

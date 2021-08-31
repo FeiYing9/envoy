@@ -12,3 +12,4 @@ types in increasing order of complexity.
   service_to_service
   front_proxy
   double_proxy
+  jres_proxy

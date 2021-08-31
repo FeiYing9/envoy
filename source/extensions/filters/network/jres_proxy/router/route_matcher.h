@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "envoy/config/route/v3/route_components.pb.h"
-#include "envoy/extensions/filters/network/Jres_proxy/v3/route.pb.h"
+#include "envoy/extensions/filters/network/jres_proxy/v3/route.pb.h"
 #include "envoy/type/v3/range.pb.h"
 
 #include "common/common/logger.h"
@@ -13,9 +13,9 @@
 #include "common/http/header_utility.h"
 #include "common/protobuf/protobuf.h"
 
-#include "extensions/filters/network/Jres_proxy/metadata.h"
-#include "extensions/filters/network/Jres_proxy/router/route.h"
-#include "extensions/filters/network/Jres_proxy/router/router.h"
+#include "extensions/filters/network/jres_proxy/metadata.h"
+#include "extensions/filters/network/jres_proxy/router/route.h"
+#include "extensions/filters/network/jres_proxy/router/router.h"
 
 #include "absl/types/optional.h"
 
@@ -28,9 +28,9 @@ namespace Router {
 class RouteEntryImplBase : public RouteEntry,
                            public Route,
                            public std::enable_shared_from_this<RouteEntryImplBase>,
-                           public Logger::Loggable<Logger::Id::Jres> {
+                           public Logger::Loggable<Logger::Id::jres> {
 public:
-  RouteEntryImplBase(const envoy::extensions::filters::network::Jres_proxy::v3::Route& route);
+  RouteEntryImplBase(const envoy::extensions::filters::network::jres_proxy::v3::Route& route);
   ~RouteEntryImplBase() override = default;
 
   // Router::RouteEntry
@@ -89,12 +89,12 @@ using RouteEntryImplBaseConstSharedPtr = std::shared_ptr<const RouteEntryImplBas
 
 class ParameterRouteEntryImpl : public RouteEntryImplBase {
 public:
-  ParameterRouteEntryImpl(const envoy::extensions::filters::network::Jres_proxy::v3::Route& route);
+  ParameterRouteEntryImpl(const envoy::extensions::filters::network::jres_proxy::v3::Route& route);
   ~ParameterRouteEntryImpl() override;
 
   struct ParameterData {
     using ParameterMatchSpecifier =
-        envoy::extensions::filters::network::Jres_proxy::v3::MethodMatch::ParameterMatchSpecifier;
+        envoy::extensions::filters::network::jres_proxy::v3::MethodMatch::ParameterMatchSpecifier;
     ParameterData(uint32_t index, const ParameterMatchSpecifier& config);
 
     Http::HeaderUtility::HeaderMatchType match_type_;
@@ -115,7 +115,7 @@ private:
 
 class MethodRouteEntryImpl : public RouteEntryImplBase {
 public:
-  MethodRouteEntryImpl(const envoy::extensions::filters::network::Jres_proxy::v3::Route& route);
+  MethodRouteEntryImpl(const envoy::extensions::filters::network::jres_proxy::v3::Route& route);
   ~MethodRouteEntryImpl() override;
 
   // RoutEntryImplBase
@@ -127,9 +127,9 @@ private:
   std::shared_ptr<ParameterRouteEntryImpl> parameter_route_;
 };
 
-class SingleRouteMatcherImpl : public RouteMatcher, public Logger::Loggable<Logger::Id::Jres> {
+class SingleRouteMatcherImpl : public RouteMatcher, public Logger::Loggable<Logger::Id::jres> {
 public:
-  using RouteConfig = envoy::extensions::filters::network::Jres_proxy::v3::RouteConfiguration;
+  using RouteConfig = envoy::extensions::filters::network::jres_proxy::v3::RouteConfiguration;
   SingleRouteMatcherImpl(const RouteConfig& config, Server::Configuration::FactoryContext& context);
 
   RouteConstSharedPtr route(const MessageMetadata& metadata, uint64_t random_value) const override;
@@ -141,10 +141,10 @@ private:
   const absl::optional<std::string> version_;
 };
 
-class MultiRouteMatcher : public RouteMatcher, public Logger::Loggable<Logger::Id::Jres> {
+class MultiRouteMatcher : public RouteMatcher, public Logger::Loggable<Logger::Id::jres> {
 public:
   using RouteConfigList = Envoy::Protobuf::RepeatedPtrField<
-      envoy::extensions::filters::network::Jres_proxy::v3::RouteConfiguration>;
+      envoy::extensions::filters::network::jres_proxy::v3::RouteConfiguration>;
   MultiRouteMatcher(const RouteConfigList& route_config_list,
                     Server::Configuration::FactoryContext& context);
 

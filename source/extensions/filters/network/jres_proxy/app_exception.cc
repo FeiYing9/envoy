@@ -1,8 +1,8 @@
-#include "extensions/filters/network/Jres_proxy/app_exception.h"
+#include "extensions/filters/network/jres_proxy/app_exception.h"
 
 #include "common/buffer/buffer_impl.h"
 
-#include "extensions/filters/network/Jres_proxy/message.h"
+#include "extensions/filters/network/jres_proxy/message.h"
 
 namespace Envoy {
 namespace Extensions {
