@@ -109,7 +109,7 @@ ConfigImpl::ConfigImpl(const JresProxyConfig& config,
   if (config.jres_filters().empty()) {
     ENVOY_LOG(debug, "using default router filter");
 
-    envoy::extensions::filters::network::jres_proxy::v3::jresFilter router_config;
+    envoy::extensions::filters::network::jres_proxy::v3::JresFilter router_config;
     router_config.set_name(JresFilters::JresFilterNames::get().ROUTER);
     registerFilter(router_config);
   } else {

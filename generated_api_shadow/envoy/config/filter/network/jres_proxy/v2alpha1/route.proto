@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package envoy.config.filter.network.dubbo_proxy.v2alpha1;
+package envoy.config.filter.network.jres_proxy.v2alpha1;
 
 import "envoy/api/v2/route/route_components.proto";
 import "envoy/type/matcher/string.proto";
