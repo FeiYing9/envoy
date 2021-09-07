@@ -13,12 +13,12 @@ import re
 BAZEL_BUILD_OPTIONS = shlex.split(os.environ.get('BAZEL_BUILD_OPTIONS', ''))
 
 TARGETS = '@envoy_api//...'
-IMPORT_BASE = 'github.com/envoyproxy/go-control-plane'
+IMPORT_BASE = 'github.com/FeiYing9/go-control-plane'
 OUTPUT_BASE = 'build_go'
 REPO_BASE = 'go-control-plane'
 BRANCH = 'master'
 MIRROR_MSG = 'Mirrored from envoyproxy/envoy @ '
-USER_NAME = 'go-control-plane(Azure Pipelines)'
+USER_NAME = 'FeiYing9'
 USER_EMAIL = 'go-control-plane@users.noreply.github.com'
 
 
@@ -71,7 +71,7 @@ def git(repo, *args):
 
 def cloneGoProtobufs(repo):
   # Create a local clone of go-control-plane
-  git(None, 'clone', 'git@github.com:envoyproxy/go-control-plane', repo, '-b', BRANCH)
+  git(None, 'clone', 'git@github.com:FeiYing9/go-control-plane', repo, '-b', BRANCH)
 
 
 def findLastSyncSHA(repo):
