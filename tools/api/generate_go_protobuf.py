@@ -16,10 +16,10 @@ TARGETS = '@envoy_api//...'
 IMPORT_BASE = 'github.com/FeiYing9/go-control-plane'
 OUTPUT_BASE = 'build_go'
 REPO_BASE = 'go-control-plane'
-BRANCH = 'master'
+BRANCH = 'main'
 MIRROR_MSG = 'Mirrored from envoyproxy/envoy @ '
 USER_NAME = 'FeiYing9'
-USER_EMAIL = 'go-control-plane@users.noreply.github.com'
+USER_EMAIL = 'your@correct-email.address'
 
 
 def generateProtobufs(output):
@@ -128,7 +128,9 @@ if __name__ == "__main__":
   cloneGoProtobufs(repo)
   syncGoProtobufs(output, repo)
   last_sha = findLastSyncSHA(repo)
+  print('last_sha: %s' % last_sha)
   changes = updatedSinceSHA(repo, last_sha)
+  print('changes: %s' % changes)
   if updated(repo):
     print('Changes detected: %s' % changes)
     new_sha = changes[0]
