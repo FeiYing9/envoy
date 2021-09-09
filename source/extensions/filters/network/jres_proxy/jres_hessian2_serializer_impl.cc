@@ -17,7 +17,7 @@ namespace JresProxy {
 
 std::pair<RpcInvocationSharedPtr, bool>
 JresHessian2SerializerImpl::deserializeRpcInvocation(Buffer::Instance& buffer,
-                                                      ContextSharedPtr context) {
+                                                     ContextSharedPtr context) {
   size_t total_size = 0, size;
   // TODO(zyfjeff): Add format checker
   std::string jres_version = HessianUtils::peekString(buffer, &size);
@@ -44,7 +44,7 @@ JresHessian2SerializerImpl::deserializeRpcInvocation(Buffer::Instance& buffer,
 
 std::pair<RpcResultSharedPtr, bool>
 JresHessian2SerializerImpl::deserializeRpcResult(Buffer::Instance& buffer,
-                                                  ContextSharedPtr context) {
+                                                 ContextSharedPtr context) {
   ASSERT(buffer.length() >= context->bodySize());
   size_t total_size = 0;
   bool has_value = true;
@@ -84,8 +84,8 @@ JresHessian2SerializerImpl::deserializeRpcResult(Buffer::Instance& buffer,
 }
 
 size_t JresHessian2SerializerImpl::serializeRpcResult(Buffer::Instance& output_buffer,
-                                                       const std::string& content,
-                                                       RpcResponseType type) {
+                                                      const std::string& content,
+                                                      RpcResponseType type) {
   size_t origin_length = output_buffer.length();
 
   // The serialized response type is compact int.

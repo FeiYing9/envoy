@@ -137,7 +137,7 @@ JresProtocolImpl::decodeHeader(Buffer::Instance& buffer, MessageMetadataSharedPt
 }
 
 bool JresProtocolImpl::decodeData(Buffer::Instance& buffer, ContextSharedPtr context,
-                                   MessageMetadataSharedPtr metadata) {
+                                  MessageMetadataSharedPtr metadata) {
   ASSERT(serializer_);
 
   if ((buffer.length()) < static_cast<uint64_t>(context->bodySize())) {
@@ -172,7 +172,7 @@ bool JresProtocolImpl::decodeData(Buffer::Instance& buffer, ContextSharedPtr con
 }
 
 bool JresProtocolImpl::encode(Buffer::Instance& buffer, const MessageMetadata& metadata,
-                               const std::string& content, RpcResponseType type) {
+                              const std::string& content, RpcResponseType type) {
   ASSERT(serializer_);
 
   switch (metadata.messageType()) {

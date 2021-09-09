@@ -10,8 +10,7 @@ namespace Extensions {
 namespace NetworkFilters {
 namespace JresProxy {
 
-struct HeartbeatResponse : public JresFilters::DirectResponse,
-                           Logger::Loggable<Logger::Id::jres> {
+struct HeartbeatResponse : public JresFilters::DirectResponse, Logger::Loggable<Logger::Id::jres> {
   HeartbeatResponse() = default;
   ~HeartbeatResponse() override = default;
 

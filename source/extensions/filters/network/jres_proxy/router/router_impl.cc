@@ -45,8 +45,8 @@ FilterStatus Router::onMessageDecoded(MessageMetadataSharedPtr metadata, Context
     ENVOY_STREAM_LOG(debug, "jres router: unknown cluster '{}'", *callbacks_,
                      route_entry_->clusterName());
     callbacks_->sendLocalReply(
-        AppException(ResponseStatus::ServerError, fmt::format("jres router: unknown cluster '{}'",
-                                                              route_entry_->clusterName())),
+        AppException(ResponseStatus::ServerError,
+                     fmt::format("jres router: unknown cluster '{}'", route_entry_->clusterName())),
         false);
     return FilterStatus::StopIteration;
   }
@@ -67,11 +67,10 @@ FilterStatus Router::onMessageDecoded(MessageMetadataSharedPtr metadata, Context
   Tcp::ConnectionPool::Instance* conn_pool =
       cluster->tcpConnPool(Upstream::ResourcePriority::Default, this);
   if (!conn_pool) {
-    callbacks_->sendLocalReply(
-        AppException(
-            ResponseStatus::ServerError,
-            fmt::format("jres router: no healthy upstream for '{}'", route_entry_->clusterName())),
-        false);
+    callbacks_->sendLocalReply(AppException(ResponseStatus::ServerError,
+                                            fmt::format("jres router: no healthy upstream for '{}'",
+                                                        route_entry_->clusterName())),
+                               false);
     return FilterStatus::StopIteration;
   }
 

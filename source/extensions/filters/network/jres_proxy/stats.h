@@ -13,7 +13,7 @@ namespace JresProxy {
 /**
  * All jres filter stats. @see stats_macros.h
  */
-#define ALL_JRES_FILTER_STATS(COUNTER, GAUGE, HISTOGRAM)                                          \
+#define ALL_JRES_FILTER_STATS(COUNTER, GAUGE, HISTOGRAM)                                           \
   COUNTER(cx_destroy_local_with_active_rq)                                                         \
   COUNTER(cx_destroy_remote_with_active_rq)                                                        \
   COUNTER(local_response_business_exception)                                                       \
@@ -43,8 +43,8 @@ struct JresFilterStats {
 
   static JresFilterStats generateStats(const std::string& prefix, Stats::Scope& scope) {
     return JresFilterStats{ALL_JRES_FILTER_STATS(POOL_COUNTER_PREFIX(scope, prefix),
-                                                   POOL_GAUGE_PREFIX(scope, prefix),
-                                                   POOL_HISTOGRAM_PREFIX(scope, prefix))};
+                                                 POOL_GAUGE_PREFIX(scope, prefix),
+                                                 POOL_HISTOGRAM_PREFIX(scope, prefix))};
   }
 };
 
