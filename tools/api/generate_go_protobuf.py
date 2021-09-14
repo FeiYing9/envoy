@@ -19,11 +19,14 @@ REPO_BASE = 'go-control-plane'
 BRANCH = 'main'
 MIRROR_MSG = 'Mirrored from envoyproxy/envoy @ '
 USER_NAME = 'FeiYing9'
-USER_EMAIL = 'your@correct-email.address'
+USER_EMAIL = '605692769@qq.com'
 
 
 def generateProtobufs(output):
+  # 输出: /build/.cache/bazel/_bazel_root/b570b5ccd0454dc9af9f65ab1833764d/execroot/envoy/bazel-out/k8-fastbuild/bin
   bazel_bin = check_output(['bazel', 'info', 'bazel-bin']).decode().strip()
+  # 输出大量诸如: b'@envoy_api//envoy/config/filter/network/dubbo_proxy/v2alpha1:pkg_go_proto'
+  #            b'@envoy_api//envoy/extensions/filters/network/dubbo_proxy/v3:pkg_go_proto'
   go_protos = check_output([
       'bazel',
       'query',
@@ -47,11 +50,19 @@ def generateProtobufs(output):
     #
     # Example output directory:
     # go_out/envoy/config/bootstrap/v2
+
+    # rule_dir: 诸如: ‘envoy/config/filter/network/dubbo_proxy/v2alpha1’
+    # proto: 全是 'pkg_go_proto'
     rule_dir, proto = rule.decode()[len('@envoy_api//'):].rsplit(':', 1)
+    # 诸如: '/build/.cache/bazel/_bazel_envoybuild/b570b5ccd0454dc9af9f65ab1833764d/execroot/envoy/bazel-out/k8-fastbuild/bin/
+    #       external/envoy_api/envoy/config/filter/network/dubbo_proxy/v2alpha1/pkg_go_proto_/github.com/FeiYing9/go-control-plane/envoy/config/filter/network/dubbo_proxy/v2alpha1'
     input_dir = os.path.join(bazel_bin, 'external', 'envoy_api', rule_dir, proto + '_', IMPORT_BASE,
                              rule_dir)
+    #print("input_dir: '%s'" %input_dir)
     input_files = glob.glob(os.path.join(input_dir, '*.go'))
-    output_dir = os.path.join(output, rule_dir)
+    #print("input_files: '%s'" %input_files)
+    output_dir = os.path.join(output, rule_dir)   # 诸如: '/source/build_go/envoy/config/filter/network/dubbo_proxy/v2alpha1'
+    #print("output_dir: '%s'" %output_dir)
 
     # Ensure the output directory exists
     os.makedirs(output_dir, 0o755, exist_ok=True)
@@ -77,6 +88,7 @@ def cloneGoProtobufs(repo):
 def findLastSyncSHA(repo):
   # Determine last envoyproxy/envoy SHA in envoyproxy/go-control-plane
   last_commit = git(repo, 'log', '--grep=' + MIRROR_MSG, '-n', '1', '--format=%B').strip()
+  #last_commit = ""
   # Initial SHA from which the APIs start syncing. Prior to that it was done manually.
   if last_commit == "":
     return 'e7f0b7176efdc65f96eb1697b829d1e6187f4502'
@@ -116,6 +128,7 @@ def publishGoProtobufs(repo, sha):
 
 
 def updated(repo):
+  #return True
   return len(
       [f for f in git(repo, 'diff', 'HEAD', '--name-only').splitlines() if f != 'envoy/COMMIT']) > 0
 
