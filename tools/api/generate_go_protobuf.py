@@ -13,7 +13,7 @@ import re
 BAZEL_BUILD_OPTIONS = shlex.split(os.environ.get('BAZEL_BUILD_OPTIONS', ''))
 
 TARGETS = '@envoy_api//...'
-IMPORT_BASE = 'github.com/FeiYing9/go-control-plane'
+IMPORT_BASE = 'github.com/envoyproxy/go-control-plane'
 OUTPUT_BASE = 'build_go'
 REPO_BASE = 'go-control-plane'
 BRANCH = 'main'
@@ -55,14 +55,14 @@ def generateProtobufs(output):
     # proto: 全是 'pkg_go_proto'
     rule_dir, proto = rule.decode()[len('@envoy_api//'):].rsplit(':', 1)
     # 诸如: '/build/.cache/bazel/_bazel_envoybuild/b570b5ccd0454dc9af9f65ab1833764d/execroot/envoy/bazel-out/k8-fastbuild/bin/
-    #       external/envoy_api/envoy/config/filter/network/dubbo_proxy/v2alpha1/pkg_go_proto_/github.com/FeiYing9/go-control-plane/envoy/config/filter/network/dubbo_proxy/v2alpha1'
+    #       external/envoy_api/envoy/config/filter/network/dubbo_proxy/v2alpha1/pkg_go_proto_/github.com/envoyproxy/go-control-plane/envoy/config/filter/network/dubbo_proxy/v2alpha1'
     input_dir = os.path.join(bazel_bin, 'external', 'envoy_api', rule_dir, proto + '_', IMPORT_BASE,
                              rule_dir)
-    #print("input_dir: '%s'" %input_dir)
+    print("input_dir: '%s'" %input_dir)
     input_files = glob.glob(os.path.join(input_dir, '*.go'))
-    #print("input_files: '%s'" %input_files)
+    print("input_files: '%s'" %input_files)
     output_dir = os.path.join(output, rule_dir)   # 诸如: '/source/build_go/envoy/config/filter/network/dubbo_proxy/v2alpha1'
-    #print("output_dir: '%s'" %output_dir)
+    print("output_dir: '%s'" %output_dir)
 
     # Ensure the output directory exists
     os.makedirs(output_dir, 0o755, exist_ok=True)
@@ -128,9 +128,9 @@ def publishGoProtobufs(repo, sha):
 
 
 def updated(repo):
-  #return True
-  return len(
-      [f for f in git(repo, 'diff', 'HEAD', '--name-only').splitlines() if f != 'envoy/COMMIT']) > 0
+  return True
+  #return len(
+  #    [f for f in git(repo, 'diff', 'HEAD', '--name-only').splitlines() if f != 'envoy/COMMIT']) > 0
 
 
 if __name__ == "__main__":
