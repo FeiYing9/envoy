@@ -16,10 +16,10 @@ TARGETS = '@envoy_api//...'
 IMPORT_BASE = 'github.com/envoyproxy/go-control-plane'
 OUTPUT_BASE = 'build_go'
 REPO_BASE = 'go-control-plane'
-BRANCH = 'master'
+BRANCH = 'istio1.9.2'
 MIRROR_MSG = 'Mirrored from envoyproxy/envoy @ '
-USER_NAME = 'go-control-plane(Azure Pipelines)'
-USER_EMAIL = 'go-control-plane@users.noreply.github.com'
+USER_NAME = 'FeiYing9'
+USER_EMAIL = '605692769@qq.com'
 
 
 def generateProtobufs(output):
@@ -71,7 +71,7 @@ def git(repo, *args):
 
 def cloneGoProtobufs(repo):
   # Create a local clone of go-control-plane
-  git(None, 'clone', 'git@github.com:envoyproxy/go-control-plane', repo, '-b', BRANCH)
+  git(None, 'clone', 'git@github.com:FeiYing9/go-control-plane', repo, '-b', BRANCH)
 
 
 def findLastSyncSHA(repo):

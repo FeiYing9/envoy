@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package envoy.config.filter.network.jres_proxy.v2alpha1;
+
+import "envoy/config/filter/network/jres_proxy/v2alpha1/route.proto";
+
+import "google/protobuf/any.proto";
+
+import "udpa/annotations/migrate.proto";
+import "udpa/annotations/status.proto";
+import "validate/validate.proto";
+
+option java_package = "io.envoyproxy.envoy.config.filter.network.jres_proxy.v2alpha1";
+option java_outer_classname = "JresProxyProto";
+option java_multiple_files = true;
+option (udpa.annotations.file_migrate).move_to_package =
+    "envoy.extensions.filters.network.jres_proxy.v3";
+option (udpa.annotations.file_status).package_version_status = FROZEN;
+
+// [#protodoc-title: Jres Proxy]
+// Jres Proxy :ref:`configuration overview <config_network_filters_jres_proxy>`.
+// [#extension: envoy.filters.network.jres_proxy]
+
+// Jres Protocol types supported by Envoy.
+enum ProtocolType {
+  // the default protocol.
+  Jres = 0;
+}
+
+// Jres Serialization types supported by Envoy.
+enum SerializationType {
+  // the default serialization protocol.
+  Hessian2 = 0;
+}
+
+// [#next-free-field: 6]
+message JresProxy {
+  // The human readable prefix to use when emitting statistics.
+  string stat_prefix = 1 [(validate.rules).string = {min_bytes: 1}];
+
+  // Configure the protocol used.
+  ProtocolType protocol_type = 2 [(validate.rules).enum = {defined_only: true}];
+
+  // Configure the serialization protocol used.
+  SerializationType serialization_type = 3 [(validate.rules).enum = {defined_only: true}];
+
+  // The route table for the connection manager is static and is specified in this property.
+  repeated RouteConfiguration route_config = 4;
+
+  // A list of individual Jres filters that make up the filter chain for requests made to the
+  // Jres proxy. Order matters as the filters are processed sequentially. For backwards
+  // compatibility, if no jres_filters are specified, a default Jres router filter
+  // (`envoy.filters.jres.router`) is used.
+  repeated JresFilter jres_filters = 5;
+}
+
+// JresFilter configures a Jres filter.
+message JresFilter {
+  // The name of the filter to instantiate. The name must match a supported
+  // filter.
+  string name = 1 [(validate.rules).string = {min_bytes: 1}];
+
+  // Filter specific configuration which depends on the filter being
+  // instantiated. See the supported filters for further documentation.
+  google.protobuf.Any config = 2;
+}

@@ -6,3 +6,4 @@ Other protocols
 
   thrift_filters/thrift_filters
   dubbo_filters/dubbo_filters
+  jres_filters/jres_filters

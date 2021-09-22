@@ -10,4 +10,5 @@ Filters
   udp/udp
   http/http
   dubbo/dubbo
+  jres/jres
   thrift/thrift

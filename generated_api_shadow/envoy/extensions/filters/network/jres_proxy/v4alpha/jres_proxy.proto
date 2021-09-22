@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package envoy.extensions.filters.network.jres_proxy.v4alpha;
+
+import "envoy/extensions/filters/network/jres_proxy/v4alpha/route.proto";
+
+import "google/protobuf/any.proto";
+
+import "udpa/annotations/status.proto";
+import "udpa/annotations/versioning.proto";
+import "validate/validate.proto";
+
+option java_package = "io.envoyproxy.envoy.extensions.filters.network.jres_proxy.v4alpha";
+option java_outer_classname = "JresProxyProto";
+option java_multiple_files = true;
+option (udpa.annotations.file_status).package_version_status = NEXT_MAJOR_VERSION_CANDIDATE;
+
+// [#protodoc-title: Jres Proxy]
+// Jres Proxy :ref:`configuration overview <config_network_filters_jres_proxy>`.
+// [#extension: envoy.filters.network.jres_proxy]
+
+// Jres Protocol types supported by Envoy.
+enum ProtocolType {
+  // the default protocol.
+  Jres = 0;
+}
+
+// Jres Serialization types supported by Envoy.
+enum SerializationType {
+  // the default serialization protocol.
+  Hessian2 = 0;
+}
+
+// [#next-free-field: 6]
+message JresProxy {
+  option (udpa.annotations.versioning).previous_message_type =
+      "envoy.extensions.filters.network.jres_proxy.v3.JresProxy";
+
+  // The human readable prefix to use when emitting statistics.
+  string stat_prefix = 1 [(validate.rules).string = {min_len: 1}];
+
+  // Configure the protocol used.
+  ProtocolType protocol_type = 2 [(validate.rules).enum = {defined_only: true}];
+
+  // Configure the serialization protocol used.
+  SerializationType serialization_type = 3 [(validate.rules).enum = {defined_only: true}];
+
+  // The route table for the connection manager is static and is specified in this property.
+  repeated RouteConfiguration route_config = 4;
+
+  // A list of individual Jres filters that make up the filter chain for requests made to the
+  // Jres proxy. Order matters as the filters are processed sequentially. For backwards
+  // compatibility, if no jres_filters are specified, a default Jres router filter
+  // (`envoy.filters.jres.router`) is used.
+  repeated JresFilter jres_filters = 5;
+}
+
+// JresFilter configures a Jres filter.
+message JresFilter {
+  option (udpa.annotations.versioning).previous_message_type =
+      "envoy.extensions.filters.network.jres_proxy.v3.JresFilter";
+
+  // The name of the filter to instantiate. The name must match a supported
+  // filter.
+  string name = 1 [(validate.rules).string = {min_len: 1}];
+
+  // Filter specific configuration which depends on the filter being
+  // instantiated. See the supported filters for further documentation.
+  google.protobuf.Any config = 2;
+}
