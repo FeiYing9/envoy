@@ -16,7 +16,7 @@ TARGETS = '@envoy_api//...'
 IMPORT_BASE = 'github.com/envoyproxy/go-control-plane'
 OUTPUT_BASE = 'build_go'
 REPO_BASE = 'go-control-plane'
-BRANCH = 'main'
+BRANCH = 'xprotocol'
 MIRROR_MSG = 'Mirrored from envoyproxy/envoy @ '
 USER_NAME = 'FeiYing9'
 USER_EMAIL = '605692769@qq.com'
@@ -128,9 +128,9 @@ def publishGoProtobufs(repo, sha):
 
 
 def updated(repo):
-  return True
-  #return len(
-  #    [f for f in git(repo, 'diff', 'HEAD', '--name-only').splitlines() if f != 'envoy/COMMIT']) > 0
+  #return True
+  return len(
+      [f for f in git(repo, 'diff', 'HEAD', '--name-only').splitlines() if f != 'envoy/COMMIT']) > 0
 
 
 if __name__ == "__main__":
