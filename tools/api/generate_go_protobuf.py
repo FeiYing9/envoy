@@ -70,8 +70,8 @@ def git(repo, *args):
 
 
 def cloneGoProtobufs(repo):
-  git(repo, 'config', '--global', 'https.proxy', 'http://192.168.95.61:7890')
-  git(repo, 'config', '--global', 'http.proxy', 'http://192.168.95.61:7890')
+  git(None, 'config', '--global', 'https.proxy', 'http://192.168.95.61:7890')
+  git(None, 'config', '--global', 'http.proxy', 'http://192.168.95.61:7890')
   # Create a local clone of go-control-plane
   git(None, 'clone', 'git@github.com:FeiYing9/go-control-plane', repo, '-b', BRANCH)
 
