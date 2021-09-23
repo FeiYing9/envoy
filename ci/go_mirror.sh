@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 MAIN_BRANCH="refs/heads/master"
 

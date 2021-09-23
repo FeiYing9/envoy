@@ -3,7 +3,7 @@
 # Run a CI build/test target, e.g. docs, asan.
 
 set -e
-
+set -x
 
 build_setup_args=""
 if [[ "$1" == "fix_format" || "$1" == "check_format" || "$1" == "check_repositories" || \
